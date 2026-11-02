@@ -1,0 +1,466 @@
+{
+  "era": "1970s",
+  "name": "Mid-1970s, Central Front",
+  "scenario": {
+    "title": "Motor rifle regiment attacks a battalion task force",
+    "brief": "The 1st Motor Rifle Regiment (fictional) attacks in the division's first echelon into the sector of a US mechanized battalion task force. Distribute the regiment across three 2 km sectors and pick where to break through."
+  },
+  "norms": {
+    "amberFraction": 0.75,
+    "roles": {
+      "breakthrough": {
+        "label": "Breakthrough",
+        "required": {"tanks": 5, "antitank": 1, "artillery": 5, "infantry": 3, "overall": 3},
+        "basis": {
+          "tanks": "approximate (DESIGN.md: 5-6:1)",
+          "antitank": "game-tuned",
+          "artillery": "approximate (DESIGN.md: 5-6:1)",
+          "infantry": "game-tuned",
+          "overall": "approximate (DESIGN.md: about 3:1)"
+        }
+      },
+      "attack": {
+        "label": "Attack",
+        "required": {"tanks": 3, "antitank": 1, "artillery": 3, "infantry": 3, "overall": 3},
+        "basis": {
+          "tanks": "game-tuned",
+          "antitank": "game-tuned",
+          "artillery": "game-tuned",
+          "infantry": "game-tuned",
+          "overall": "approximate (DESIGN.md: about 3:1)"
+        }
+      },
+      "holding": {
+        "label": "Holding attack",
+        "required": {"tanks": 1, "antitank": 1, "artillery": 1, "infantry": 1, "overall": 1},
+        "basis": {"tanks": "game-tuned", "antitank": "game-tuned", "artillery": "game-tuned", "infantry": "game-tuned", "overall": "game-tuned"}
+      }
+    }
+  },
+  "sectors": [
+    {"id": "A", "name": "Sector A (north)", "widthKm": 2, "defaultRole": "attack"},
+    {"id": "B", "name": "Sector B (centre, main road)", "widthKm": 2, "defaultRole": "breakthrough"},
+    {"id": "C", "name": "Sector C (south)", "widthKm": 2, "defaultRole": "attack"}
+  ],
+  "soviet": {
+    "name": "1st Motor Rifle Regiment (BMP)",
+    "formations": [
+      {"id": "1MRB", "name": "1st Motor Rifle Battalion", "short": "1 MRB", "kind": "motor-rifle", "canSpread": false},
+      {"id": "2MRB", "name": "2nd Motor Rifle Battalion", "short": "2 MRB", "kind": "motor-rifle", "canSpread": false},
+      {"id": "3MRB", "name": "3rd Motor Rifle Battalion", "short": "3 MRB", "kind": "motor-rifle", "canSpread": false},
+      {"id": "TB", "name": "Tank Battalion", "short": "TB", "kind": "tank", "canSpread": false},
+      {"id": "RAB", "name": "Regimental Artillery Battalion (2S1)", "short": "Regt Arty", "kind": "artillery", "canSpread": true},
+      {"id": "DAB", "name": "Attached Division Artillery Battalion (D-30)", "short": "Div Arty", "kind": "artillery", "canSpread": true},
+      {"id": "AAB", "name": "Attached Army Artillery Battalion (D-20)", "short": "Army Arty", "kind": "artillery", "canSpread": true},
+      {"id": "RECON", "name": "Reconnaissance Company", "short": "Recon", "kind": "recon", "canSpread": false},
+      {"id": "ATB", "name": "Antitank Battery", "short": "AT Btry", "kind": "antitank", "canSpread": false},
+      {"id": "ADB", "name": "Air Defense Battery", "short": "AD Btry", "kind": "air-defense", "canSpread": false}
+    ],
+    "units": [
+      {
+        "id": "1MRB-1",
+        "side": "SOV",
+        "name": "1st MR Coy",
+        "parent": "1MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "1MRB-2",
+        "side": "SOV",
+        "name": "2nd MR Coy",
+        "parent": "1MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "1MRB-3",
+        "side": "SOV",
+        "name": "3rd MR Coy",
+        "parent": "1MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "1MRB-HQ",
+        "side": "SOV",
+        "name": "Bn HQ",
+        "parent": "1MRB",
+        "equipment": {"BMP-1": 1},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "1MRB-MOR",
+        "side": "SOV",
+        "name": "Mortar Btry",
+        "parent": "1MRB",
+        "equipment": {"120mm mortar": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "1MRB-AT",
+        "side": "SOV",
+        "name": "AT Plt",
+        "parent": "1MRB",
+        "equipment": {"SPG-9": 2, "AT-3 team": 2},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "2MRB-4",
+        "side": "SOV",
+        "name": "4th MR Coy",
+        "parent": "2MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "2MRB-5",
+        "side": "SOV",
+        "name": "5th MR Coy",
+        "parent": "2MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 0.7,
+        "readiness": 1.0,
+        "note": "Understrength: 3 BMP-1 short after road-march breakdowns"
+      },
+      {
+        "id": "2MRB-6",
+        "side": "SOV",
+        "name": "6th MR Coy",
+        "parent": "2MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "2MRB-HQ",
+        "side": "SOV",
+        "name": "Bn HQ",
+        "parent": "2MRB",
+        "equipment": {"BMP-1": 1},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "2MRB-MOR",
+        "side": "SOV",
+        "name": "Mortar Btry",
+        "parent": "2MRB",
+        "equipment": {"120mm mortar": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "2MRB-AT",
+        "side": "SOV",
+        "name": "AT Plt",
+        "parent": "2MRB",
+        "equipment": {"SPG-9": 2, "AT-3 team": 2},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "3MRB-7",
+        "side": "SOV",
+        "name": "7th MR Coy",
+        "parent": "3MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 0.9,
+        "note": "Readiness 0.9: arrived late from the march, little time for battle procedure"
+      },
+      {
+        "id": "3MRB-8",
+        "side": "SOV",
+        "name": "8th MR Coy",
+        "parent": "3MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 0.9,
+        "note": "Readiness 0.9: arrived late from the march, little time for battle procedure"
+      },
+      {
+        "id": "3MRB-9",
+        "side": "SOV",
+        "name": "9th MR Coy",
+        "parent": "3MRB",
+        "equipment": {"BMP-1": 10, "RPG-7": 9},
+        "strength": 1.0,
+        "readiness": 0.9,
+        "note": "Readiness 0.9: arrived late from the march, little time for battle procedure"
+      },
+      {
+        "id": "3MRB-HQ",
+        "side": "SOV",
+        "name": "Bn HQ",
+        "parent": "3MRB",
+        "equipment": {"BMP-1": 1},
+        "strength": 1.0,
+        "readiness": 0.9
+      },
+      {
+        "id": "3MRB-MOR",
+        "side": "SOV",
+        "name": "Mortar Btry",
+        "parent": "3MRB",
+        "equipment": {"120mm mortar": 6},
+        "strength": 1.0,
+        "readiness": 0.9
+      },
+      {
+        "id": "3MRB-AT",
+        "side": "SOV",
+        "name": "AT Plt",
+        "parent": "3MRB",
+        "equipment": {"SPG-9": 2, "AT-3 team": 2},
+        "strength": 1.0,
+        "readiness": 0.9
+      },
+      {
+        "id": "TB-1",
+        "side": "SOV",
+        "name": "1st Tank Coy",
+        "parent": "TB",
+        "equipment": {"T-62": 10},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "TB-2",
+        "side": "SOV",
+        "name": "2nd Tank Coy",
+        "parent": "TB",
+        "equipment": {"T-62": 10},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "TB-3",
+        "side": "SOV",
+        "name": "3rd Tank Coy",
+        "parent": "TB",
+        "equipment": {"T-62": 10},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "TB-HQ",
+        "side": "SOV",
+        "name": "Bn HQ",
+        "parent": "TB",
+        "equipment": {"T-62": 1},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "RAB-1",
+        "side": "SOV",
+        "name": "1st Btry",
+        "parent": "RAB",
+        "equipment": {"2S1": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "RAB-2",
+        "side": "SOV",
+        "name": "2nd Btry",
+        "parent": "RAB",
+        "equipment": {"2S1": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "RAB-3",
+        "side": "SOV",
+        "name": "3rd Btry",
+        "parent": "RAB",
+        "equipment": {"2S1": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "DAB-1",
+        "side": "SOV",
+        "name": "1st Btry",
+        "parent": "DAB",
+        "equipment": {"D-30": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "DAB-2",
+        "side": "SOV",
+        "name": "2nd Btry",
+        "parent": "DAB",
+        "equipment": {"D-30": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "DAB-3",
+        "side": "SOV",
+        "name": "3rd Btry",
+        "parent": "DAB",
+        "equipment": {"D-30": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "AAB-1",
+        "side": "SOV",
+        "name": "1st Btry",
+        "parent": "AAB",
+        "equipment": {"D-20": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "AAB-2",
+        "side": "SOV",
+        "name": "2nd Btry",
+        "parent": "AAB",
+        "equipment": {"D-20": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "AAB-3",
+        "side": "SOV",
+        "name": "3rd Btry",
+        "parent": "AAB",
+        "equipment": {"D-20": 6},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "RECON-1",
+        "side": "SOV",
+        "name": "Recon Coy",
+        "parent": "RECON",
+        "equipment": {"PT-76": 3, "BRDM-2": 4},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "ATB-1",
+        "side": "SOV",
+        "name": "AT Btry",
+        "parent": "ATB",
+        "equipment": {"9P122": 9},
+        "strength": 1.0,
+        "readiness": 1.0
+      },
+      {
+        "id": "ADB-1",
+        "side": "SOV",
+        "name": "AD Btry",
+        "parent": "ADB",
+        "equipment": {"ZSU-23-4": 4, "SA-9": 4},
+        "strength": 1.0,
+        "readiness": 1.0
+      }
+    ]
+  },
+  "nato": {
+    "name": "US Mech Battalion Task Force (intelligence estimate)",
+    "formations": [
+      {"id": "TF", "name": "US Mechanized Battalion Task Force (mech-heavy)", "short": "TF", "kind": "task-force", "canSpread": false},
+      {"id": "SPT", "name": "Supporting artillery", "short": "Arty", "kind": "artillery", "canSpread": true},
+      {"id": "BDE", "name": "Brigade reserve", "short": "Bde Res", "kind": "reserve", "canSpread": false}
+    ],
+    "units": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Team A (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Battle position on the forward slope, seen by division recon"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Astride the main road"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Team C (pure mech coy)",
+        "parent": "TF",
+        "equipment": {"M113": 13, "Dragon": 9, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "intel": {"status": "suspected", "low": 0.7, "high": 1.3},
+        "note": "Composition inferred from radio intercepts; no tanks seen"
+      },
+      {
+        "id": "TM-D",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 8, "Dragon": 6},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Believed in depth behind sector B; could counterattack into A or C"
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.75, "high": 1.25},
+        "note": "Can fire into any sector"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Share of the brigade's direct-support battalion; masses on any sector"
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Not in any sector; may reinforce the main threat within hours"
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "T-55": {
+    "name": "T-55 medium tank",
+    "type": "tank", "category": "tanks", "cp": 1.00, "era": ["1970s"],
+    "basis": "source", "ref": "CIA 1977 table, reference weapon (T-55 = 1.0)"
+  },
+  "T-62": {
+    "name": "T-62 medium tank",
+    "type": "tank", "category": "tanks", "cp": 1.00, "era": ["1970s"],
+    "basis": "source", "ref": "CIA 1977 table (OCR, verify)"
+  },
+  "T-54A": {
+    "name": "T-54A medium tank",
+    "type": "tank", "category": "tanks", "cp": 0.90, "era": ["1970s"],
+    "basis": "source", "ref": "CIA 1977 table (OCR, verify)"
+  },
+  "PT-76": {
+    "name": "PT-76 amphibious light tank",
+    "type": "light-tank", "category": "tanks", "cp": 0.45, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "BMP-1": {
+    "name": "BMP-1 infantry fighting vehicle (with squad)",
+    "type": "ifv", "category": "infantry", "cp": 0.80, "era": ["1970s", "1980s"],
+    "basis": "source", "ref": "CIA 1977 table (OCR, verify)"
+  },
+  "BTR-60PB": {
+    "name": "BTR-60PB armoured personnel carrier (with squad)",
+    "type": "apc", "category": "infantry", "cp": 0.45, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "BRDM-2": {
+    "name": "BRDM-2 reconnaissance vehicle",
+    "type": "recon", "category": "other", "cp": 0.25, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "RPG-7": {
+    "name": "RPG-7 antitank grenade launcher",
+    "type": "rpg", "category": "antitank", "cp": 0.08, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "SPG-9": {
+    "name": "SPG-9 73 mm recoilless gun",
+    "type": "recoilless", "category": "antitank", "cp": 0.15, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "AT-3 team": {
+    "name": "9K11 Malyutka (AT-3 Sagger), manpack team",
+    "type": "atgm", "category": "antitank", "cp": 0.20, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "9P122": {
+    "name": "9P122 BRDM-2 ATGM carrier (6 x AT-3)",
+    "type": "atgm", "category": "antitank", "cp": 0.50, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "120mm mortar": {
+    "name": "120 mm mortar (M-1943 / PM-38)",
+    "type": "mortar", "category": "artillery", "cp": 0.30, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "2S1": {
+    "name": "2S1 Gvozdika 122 mm self-propelled howitzer",
+    "type": "sp-howitzer", "category": "artillery", "cp": 0.55, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "D-30": {
+    "name": "D-30 122 mm towed howitzer",
+    "type": "howitzer", "category": "artillery", "cp": 0.50, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "D-20": {
+    "name": "D-20 152 mm towed gun-howitzer",
+    "type": "howitzer", "category": "artillery", "cp": 0.65, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "ZSU-23-4": {
+    "name": "ZSU-23-4 Shilka self-propelled AA gun",
+    "type": "spaag", "category": "other", "cp": 0.40, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "SA-9": {
+    "name": "9K31 Strela-1 (SA-9) SAM vehicle",
+    "type": "sam", "category": "other", "cp": 0.05, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+
+  "M60A1": {
+    "name": "M60A1 main battle tank",
+    "type": "tank", "category": "tanks", "cp": 1.10, "era": ["1970s"],
+    "basis": "game-tuned", "ref": "placeholder value from DESIGN.md"
+  },
+  "M1": {
+    "name": "M1 Abrams main battle tank (then experimental)",
+    "type": "tank", "category": "tanks", "cp": 2.50, "era": ["1980s"],
+    "basis": "source", "ref": "CIA 1977 table (OCR, verify)"
+  },
+  "M113": {
+    "name": "M113 armoured personnel carrier (with squad)",
+    "type": "apc", "category": "infantry", "cp": 0.35, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "Dragon": {
+    "name": "M47 Dragon medium antitank weapon",
+    "type": "atgm", "category": "antitank", "cp": 0.20, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "TOW": {
+    "name": "BGM-71 TOW launcher (M151 or M113 mounted)",
+    "type": "atgm", "category": "antitank", "cp": 0.45, "era": ["1970s"],
+    "basis": "game-tuned"
+  },
+  "M125A1": {
+    "name": "M125A1 81 mm mortar carrier",
+    "type": "mortar", "category": "artillery", "cp": 0.15, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "M106A1": {
+    "name": "M106A1 4.2 in (107 mm) mortar carrier",
+    "type": "mortar", "category": "artillery", "cp": 0.25, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  },
+  "M109A1": {
+    "name": "M109A1 155 mm self-propelled howitzer",
+    "type": "sp-howitzer", "category": "artillery", "cp": 0.65, "era": ["1970s", "1980s"],
+    "basis": "game-tuned"
+  }
+}
