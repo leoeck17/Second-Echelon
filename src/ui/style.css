@@ -215,3 +215,110 @@ td.status-none { color: var(--muted); }
   .top, .layout { padding: 12px 16px; }
   .legend { font-size: 11px; }
 }
+
+/* ---------- TDG screens ---------- */
+
+.small { font-size: 12px; }
+.lead { font-size: 15px; max-width: 70ch; }
+.linkish { border: none; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.linkish:hover { text-decoration: underline; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; padding: 5px 14px; }
+button.primary:hover { filter: brightness(1.1); }
+button.big { font-size: 15px; padding: 8px 18px; margin-top: 8px; }
+button:disabled { opacity: 0.5; cursor: default; }
+.top-right { display: flex; gap: 12px; align-items: center; }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; cursor: pointer; margin: 8px 0; }
+
+.stepper { list-style: none; display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 0; padding: 0; font-size: 12px; }
+.stepper li { padding: 1px 8px; border-radius: 10px; background: var(--chip); color: var(--muted); }
+.stepper li.done { color: var(--text); }
+.stepper li.current { background: var(--on); color: var(--on-text); font-weight: 600; }
+
+.timer {
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  min-width: 4.5ch;
+  text-align: center;
+}
+.timer.low { color: var(--red); border-color: var(--red); background: var(--red-bg); }
+
+.menu, .briefing, .debrief { padding: 16px; }
+main > .situation { margin: 12px 16px 0; }
+.cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.card p { margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; }
+
+.chip.verdict-success, .banner.verdict-success { background: var(--green-bg); color: var(--green); }
+.chip.verdict-partial, .banner.verdict-partial { background: var(--amber-bg); color: var(--amber); }
+.chip.verdict-failure, .banner.verdict-failure { background: var(--red-bg); color: var(--red); }
+
+.briefing { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .briefing { grid-template-columns: minmax(0, 1fr); } }
+.briefing h3 { margin: 16px 0 6px; }
+.brief-sectors { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.brief-sector { border: 1px solid var(--border); border-radius: 4px; padding: 8px; }
+.brief-sector h3 { margin: 0 0 4px; font-size: 13px; }
+.brief-sector ul, .prep { margin: 0; padding-left: 18px; font-size: 13px; }
+
+.actionbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 12px 16px 0; }
+.actionbar.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+}
+.bar-end { display: inline-flex; gap: 10px; align-items: center; margin-left: auto; }
+.banner .actionbar { justify-content: flex-start; padding: 8px 0 0; }
+.recon { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 13px; }
+.recon-buttons { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+main > .legend { padding: 8px 16px 0; }
+.error { margin: 8px 16px 0; padding: 6px 10px; border-radius: 4px; background: var(--red-bg); color: var(--red); font-size: 13px; }
+
+.findings { margin: 8px 16px 0; font-size: 13px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; }
+.findings summary { cursor: pointer; font-weight: 600; }
+.findings ul { margin: 6px 0; padding-left: 18px; }
+.finding-dummy, .finding-hidden, .finding-moved-here, .finding-absent, .finding-changed { color: var(--amber); }
+
+.locked { font-size: 12px; color: var(--muted); }
+.locked-card { opacity: 0.8; }
+.committed-chip.fixed { padding: 1px 6px; border-radius: 4px; }
+
+.situation h3 { margin: 12px 0 4px; }
+.phase-summary { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.phase-summary li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 13px; }
+.phase-summary small { color: var(--muted); }
+.sector-id { font-weight: 700; min-width: 1.5em; }
+.situation-list { margin: 0; padding-left: 18px; font-size: 13px; }
+.outcome { font-size: 12px; font-weight: 650; border-radius: 3px; padding: 0 6px; white-space: nowrap; }
+.outcome-success { background: var(--green-bg); color: var(--green); }
+.outcome-stalled { background: var(--amber-bg); color: var(--amber); }
+.outcome-repulsed { background: var(--red-bg); color: var(--red); }
+.outcome-none { background: var(--chip); color: var(--muted); }
+
+.debrief { display: grid; gap: 16px; }
+.banner { border-radius: 6px; padding: 16px; }
+.banner h2 { font-size: 20px; }
+.banner p { margin: 6px 0 0; color: var(--text); max-width: 90ch; }
+.table-wrap { overflow-x: auto; }
+.debrief-table th small, .debrief-table td small { display: block; color: var(--muted); font-weight: 400; white-space: normal; }
+.debrief-table td.ratio { padding-right: 6px; }
+.tag { font-size: 11px; border-radius: 3px; padding: 0 5px; white-space: nowrap; }
+.tag-accurate { background: var(--green-bg); color: var(--green); }
+.tag-changed, .tag-moved { background: var(--amber-bg); color: var(--amber); }
+.tag-dummy, .tag-hidden { background: var(--red-bg); color: var(--red); }
+.school-list { margin: 4px 0; padding-left: 18px; font-size: 13px; columns: 2 200px; }
+
+@media (max-width: 600px) {
+  .actionbar.sticky { padding: 6px 12px; gap: 6px; }
+  .actionbar.sticky .recon .small, .actionbar.sticky > span:first-child:not(.recon) { display: none; }
+  .actionbar.sticky .recon { font-size: 12px; gap: 4px 8px; }
+  .timer { font-size: 18px; }
+}

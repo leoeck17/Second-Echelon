@@ -198,14 +198,15 @@ The M60A1 value above is a placeholder; every coefficient should be marked as so
 Build the COFM calculator first, without a map: it is the heart of the game and is already fun as a planning puzzle. Each milestone below ends with something you can play.
 
 1. **M0 – Data and COFM core.** Equipment and unit JSON for the 1970s; `cofm.ts` with tests. A screen listing both forces, three sectors, and live ratios against the norms.
-2. **M1 – Map and deployment.** Hex map, terrain, units placed on it; drag battalions into sectors and echelons.
-3. **M2 – Fire planning.** Artillery groups, preparation length, tubes-per-km check.
-4. **M3 – Execution.** Movement, combat, suppression, breaking point; speed controls and decision points.
-5. **M4 – NATO AI.** Active Defense profile with role-based triggers.
-6. **M5 – Fog of war and recon.** Hidden units, estimates with ranges, planning-hours budget.
-7. **M6 – Debrief.** Plan versus reality, revealed NATO positions, scoring.
-8. **M7 – 1980s era.** New equipment data and the AirLand Battle AI profile.
-9. **M8 – Polish.** Tutorial scenario, more scenarios, sound, save games.
+2. **M0.5 – Tactical decision game.** Playable without a map: scenarios with a hidden true NATO deployment, recon that costs planning time, an abstract adjudication step (`adjudicate.ts`: COFM score × seeded chance → outcome and losses), the NATO reserve reacting to the main effort, one mid-battle decision (commit the second echelon, shift fires), an optional timer, and a debrief against the truth and a school solution. M3's simulation later replaces `adjudicate.ts` behind the same phase interface; the scenarios carry over.
+3. **M1 – Map and deployment.** Hex map, terrain, units placed on it; drag battalions into sectors and echelons.
+4. **M2 – Fire planning.** Artillery groups, preparation length, tubes-per-km check.
+5. **M3 – Execution.** Movement, combat, suppression, breaking point; speed controls and decision points.
+6. **M4 – NATO AI.** Active Defense profile with role-based triggers.
+7. **M5 – Fog of war and recon.** Hidden units, estimates with ranges, planning-hours budget (sector-level first version in M0.5; M5 adds spotting on the map).
+8. **M6 – Debrief.** Plan versus reality, revealed NATO positions, scoring (first version in M0.5).
+9. **M7 – 1980s era.** New equipment data and the AirLand Battle AI profile.
+10. **M8 – Polish.** Tutorial scenario, more scenarios, sound, save games.
 
 **Working with Claude Code**
 
