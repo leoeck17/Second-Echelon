@@ -1,0 +1,195 @@
+{
+  "id": "1970s-03-late-h-hour",
+  "era": "1970s",
+  "title": "3. Late H-hour",
+  "brief": "The march ran late. H-hour is in two hours, and every hour spent on recon is an hour your battalions don't have for battle procedure. The task force is strongest in the village at the crossroads. Decide quickly.",
+  "seed": 1977,
+  "planningHours": 2,
+  "timeLimitSec": {"planning": 240, "decision": 90},
+  "sectors": [
+    {"id": "A", "name": "Sector A (forest edge)", "widthKm": 2.5, "defaultRole": "attack"},
+    {"id": "B", "name": "Sector B (village, crossroads)", "widthKm": 2, "defaultRole": "attack"},
+    {"id": "C", "name": "Sector C (open ground)", "widthKm": 1.5, "defaultRole": "attack"}
+  ],
+  "nato": {
+    "name": "US Mech Battalion Task Force",
+    "formations": [
+      {"id": "TF", "name": "US Mechanized Battalion Task Force (mech-heavy)", "short": "TF", "kind": "task-force", "canSpread": false},
+      {"id": "SPT", "name": "Supporting artillery", "short": "Arty", "kind": "artillery", "canSpread": true},
+      {"id": "BDE", "name": "Brigade reserve", "short": "Bde Res", "kind": "reserve", "canSpread": false}
+    ],
+    "estimate": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Team A (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 2, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Dug in along the forest edge"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (tank-heavy, in the village)",
+        "parent": "TF",
+        "equipment": {"M60A1": 10, "M113": 5, "Dragon": 3, "TOW": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Strongpoint in the village; TOWs on the crossroads"
+      },
+      {
+        "id": "TM-T",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 4, "Dragon": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "suspected", "low": 0.6, "high": 1.4},
+        "note": "Believed behind the village"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Team C (mech plt + scouts)",
+        "parent": "TF",
+        "equipment": {"M113": 7, "Dragon": 3, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "intel": {"status": "suspected", "low": 0.6, "high": 1.4},
+        "note": "Thin screen on open ground"
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.75, "high": 1.25},
+        "note": "Can fire into any sector"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Share of the brigade's direct-support battalion"
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Not in any sector; may reinforce the main threat"
+      }
+    ],
+    "truth": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Team A (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 2, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (tank-heavy, in the village)",
+        "parent": "TF",
+        "equipment": {"M60A1": 10, "M113": 5, "Dragon": 3, "TOW": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B"
+      },
+      {
+        "id": "TM-T",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 4, "Dragon": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Team C (mech plt + scouts)",
+        "parent": "TF",
+        "equipment": {"M113": 5, "Dragon": 2, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C"
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "DS Field Artillery Bn (3 btrys)",
+        "parent": "SPT",
+        "equipment": {"M109A1": 18},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "note": "The whole battalion was firing for this TF."
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve"
+      }
+    ]
+  },
+  "natoReaction": {
+    "units": ["BDE-RES"],
+    "rule": "most-threatened",
+    "text": "The brigade reserve tank company counterattacks toward the Soviet main effort: the sector with the most Soviet combat power."
+  },
+  "schoolSolution": {
+    "recon": [],
+    "plan": {
+      "assignment": {"TB": "C", "1MRB": "C", "RAB": "C", "DAB": "C", "AAB": "C", "ATB": "C", "3MRB": "A"},
+      "roles": {"A": "holding", "B": "holding", "C": "breakthrough"}
+    },
+    "decision": {"2MRB": "C", "RECON": "C"},
+    "text": "No time for recon: use it for battle procedure. Bypass the village, break through on the open ground in C where only a screen stands, fix Team A with a holding attack, and keep 2 MRB to meet the brigade reserve."
+  }
+}

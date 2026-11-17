@@ -1,0 +1,207 @@
+{
+  "id": "1970s-02-suspected-reserve",
+  "era": "1970s",
+  "title": "2. The suspected reserve",
+  "brief": "Same task force, different night. Division thinks the TF reserve is still behind sector B, and a patrol reports tanks in sector C. On paper sector A is the weak spot. Recon costs planning time, and the regiment needs time for battle procedure too.",
+  "seed": 1975,
+  "planningHours": 6,
+  "timeLimitSec": {"planning": 480, "decision": 150},
+  "sectors": [
+    {"id": "A", "name": "Sector A (north)", "widthKm": 2, "defaultRole": "attack"},
+    {"id": "B", "name": "Sector B (centre, main road)", "widthKm": 2, "defaultRole": "breakthrough"},
+    {"id": "C", "name": "Sector C (south)", "widthKm": 2, "defaultRole": "attack"}
+  ],
+  "nato": {
+    "name": "US Mech Battalion Task Force",
+    "formations": [
+      {"id": "TF", "name": "US Mechanized Battalion Task Force (mech-heavy)", "short": "TF", "kind": "task-force", "canSpread": false},
+      {"id": "SPT", "name": "Supporting artillery", "short": "Arty", "kind": "artillery", "canSpread": true},
+      {"id": "BDE", "name": "Brigade reserve", "short": "Bde Res", "kind": "reserve", "canSpread": false}
+    ],
+    "estimate": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Team A (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Battle position on the forward slope, seen by division recon"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Astride the main road"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Team C (pure mech coy)",
+        "parent": "TF",
+        "equipment": {"M113": 13, "Dragon": 9, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "intel": {"status": "suspected", "low": 0.7, "high": 1.3},
+        "note": "Composition inferred from radio intercepts; no tanks seen"
+      },
+      {
+        "id": "TM-D",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 8, "Dragon": 6},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Believed in depth behind sector B; could counterattack into A or C"
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.75, "high": 1.25},
+        "note": "Can fire into any sector"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Share of the brigade's direct-support battalion; masses on any sector"
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Not in any sector; may reinforce the main threat within hours"
+      },
+      {
+        "id": "TM-X",
+        "side": "NATO",
+        "name": "Suspected tank team",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 4, "Dragon": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Tank noise and fresh tracks reported by a patrol; not seen"
+      }
+    ],
+    "truth": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Team A (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (2 mech plt + 1 tank plt)",
+        "parent": "TF",
+        "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Team C (pure mech coy)",
+        "parent": "TF",
+        "equipment": {"M113": 13, "Dragon": 9, "TOW": 4, "M125A1": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C"
+      },
+      {
+        "id": "TM-D",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 8, "Dragon": 6},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "note": "Moved behind Team A during the night."
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread"
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve"
+      }
+    ]
+  },
+  "natoReaction": {
+    "units": ["BDE-RES"],
+    "rule": "most-threatened",
+    "text": "The brigade reserve tank company counterattacks toward the Soviet main effort: the sector with the most Soviet combat power."
+  },
+  "schoolSolution": {
+    "recon": ["A"],
+    "plan": {
+      "assignment": {"TB": "B", "1MRB": "B", "RAB": "B", "DAB": "B", "AAB": "B", "ATB": "B", "3MRB": "A"},
+      "roles": {"A": "holding", "B": "breakthrough", "C": "holding"}
+    },
+    "decision": {"2MRB": "B", "RECON": "B"},
+    "text": "The picture is too convenient. Recon of sector A finds Team Tank there; the tanks in C are a deception. Break through in B, which holds only Team B, fix A with a holding attack, and commit 2 MRB into B against the brigade reserve."
+  }
+}
