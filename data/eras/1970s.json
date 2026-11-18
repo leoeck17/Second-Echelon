@@ -30,7 +30,7 @@
         "label": "Exploitation",
         "selectable": false,
         "note": "Applied automatically in phase 2 to a sector broken through in phase 1: exploiting and holding off counterattacks.",
-        "required": {"tanks": 4, "antitank": 1, "artillery": 3, "infantry": 2.5, "overall": 2.5},
+        "required": {"tanks": 3, "antitank": 1, "artillery": 2.5, "infantry": 2.5, "overall": 2},
         "basis": {"tanks": "game-tuned", "antitank": "game-tuned", "artillery": "game-tuned", "infantry": "game-tuned", "overall": "game-tuned"}
       },
       "holding": {
@@ -67,6 +67,27 @@
     "exploitRole": "exploitation",
     "exploitMinShare": 0.3,
     "lossLimit": 0.35
+  },
+  "terrain": {
+    "basis": "game-tuned",
+    "note": "Defence multiplies the defender's potential by the terrain it holds; broken/open ground is the baseline the norms assume. Movement is cost per metre.",
+    "defence": {"open": 1.0, "forest": 1.1, "town": 1.25, "water": 1.2, "marsh": 1.1, "ridge": 1.1},
+    "movement": {"open": 1.0, "forest": 2.0, "town": 1.5, "water": 8.0, "marsh": 3.0, "ridge": 1.3},
+    "roadMovement": 0.7,
+    "roadWidth": 150,
+    "crossingRadius": 300,
+    "riverPenalty": 1500
+  },
+  "axes": {
+    "basis": "game-tuned",
+    "engagementRadius": 1500,
+    "bypassRange": 3200,
+    "encircleRange": 3200,
+    "closeDistance": 1000,
+    "flankWeight": 0.15,
+    "cutOffLoss": 0.25,
+    "encircledLoss": 0.6,
+    "tempoExponent": 0.3
   },
   "soviet": {
     "name": "1st Motor Rifle Regiment (BMP)",

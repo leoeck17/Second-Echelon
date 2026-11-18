@@ -66,9 +66,11 @@ describe('tdg: briefing and planning', () => {
   });
 
   it('rates the plan against the current estimate with current readiness', () => {
-    const s = run(planning(), { type: 'assign', formationId: 'TB', placement: 'A' }, { type: 'recon', sectorId: 'A' }, { type: 'recon', sectorId: 'B' }, { type: 'recon', sectorId: 'C' });
-    const r = rateAgainstEstimate(ctx, s);
-    expect(r.sectors[0]!.soviet.tanks).toBeCloseTo(31 * currentReadiness(ctx, s));
+    const fresh = run(planning(), { type: 'assign', formationId: 'TB', placement: 'A' });
+    const s = run(fresh, { type: 'recon', sectorId: 'A' }, { type: 'recon', sectorId: 'B' }, { type: 'recon', sectorId: 'C' });
+    const k = currentReadiness(ctx, s);
+    expect(k).toBeLessThan(1);
+    expect(rateAgainstEstimate(ctx, s).sectors[0]!.soviet.tanks).toBeCloseTo(rateAgainstEstimate(ctx, fresh).sectors[0]!.soviet.tanks * k);
   });
 });
 

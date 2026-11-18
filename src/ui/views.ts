@@ -188,6 +188,12 @@ export function renderBriefing(ctx: TdgContext, s: TdgState, timerOn: boolean): 
           ${ctx.era.recon.hoursPerSector} h and replaces the estimate there with what is really there (dummies vanish,
           hidden units appear). Hours you don't spend on recon go to battle procedure:</p>
         <ul class="prep">${prep}</ul>
+        <h3>How to give orders</h3>
+        <p>On the map, north is up and your regiment attacks from the right. Drag a unit, or tap it and then tap the map.
+          The depth band you drop it in sets its echelon: first echelon attacks, second echelon waits for your decision.
+          Artillery fires on the sector it stands behind, or on all sectors from the GS area. Select a battalion and
+          use <em>Draw axis</em> to bend its axis of advance: units it passes close by are engaged, units it passes
+          at a distance are bypassed, and a unit passed on both sides by attacks that break through is encircled.</p>
         <h3>How it ends</h3>
         <p>Phase 1: your first echelon attacks. NATO then moves its reserve toward your main effort and you decide what to
           commit. Phase 2 settles it. You accomplish the mission if a sector you attack is broken through and held with at
@@ -206,6 +212,7 @@ export function renderBriefing(ctx: TdgContext, s: TdgState, timerOn: boolean): 
 
 interface ForcesOpts {
   editableRoles: boolean;
+  selected?: string | null;
   isMovable: (formationId: string) => boolean;
   lockedReason: string;
 }
@@ -226,28 +233,30 @@ function renderFormation(ctx: TdgContext, s: TdgState, f: Formation, opts: Force
   const strength = lossy
     ? totalPotential(units.map((u) => ({ ...u, strength: start.get(u.id) ?? 1 })), ctx.table).overall
     : 0;
-  const options: { value: Placement; label: string; title: string }[] = [
-    ...ctx.scenario.sectors.map((sec) => ({ value: sec.id as Placement, label: sec.id, title: `Assign to ${sec.name}` })),
-    ...(f.canSpread ? [{ value: 'spread' as Placement, label: 'Spread', title: 'Divide fires evenly over all sectors' }] : []),
-    { value: null, label: '—', title: 'Uncommitted (second echelon / reserve)' },
-  ];
+  const ech = s.plan.echelon[f.id];
+  const btn = (action: string, value: string, label: string, title: string, on: boolean) =>
+    `<button type="button" class="assign${on ? ' on' : ''}" data-action="${action}" data-formation="${f.id}"
+      data-placement="${value}" aria-pressed="${on}" title="${esc(title)}">${label}</button>`;
+  const first = ctx.scenario.sectors
+    .map((sec) => btn('assign', sec.id, sec.id, f.canSpread ? `Support ${sec.name}` : `First echelon in ${sec.name}`, current === sec.id && (f.canSpread || ech === 'first')))
+    .join('');
+  const second = f.canSpread
+    ? btn('assign', 'spread', 'GS', 'General support: fires into all sectors', current === 'spread')
+    : `<span class="assign-label">2nd</span>${ctx.scenario.sectors
+        .map((sec) => btn('second', sec.id, sec.id, `Second echelon behind ${sec.name}`, current === sec.id && ech === 'second'))
+        .join('')}`;
   const buttons = movable
-    ? options
-        .map((o) => {
-          const on = o.value === current;
-          return `<button type="button" class="assign${on ? ' on' : ''}" data-action="assign" data-formation="${f.id}"
-            data-placement="${o.value ?? ''}" aria-pressed="${on}" title="${esc(o.title)}">${o.label}</button>`;
-        })
-        .join('')
+    ? `<span class="assign-label">${f.canSpread ? 'Fire' : '1st'}</span>${first}${second}${btn('assign', '', '—', 'Back to the assembly area (reserve)', current === null)}`
     : `<span class="locked">${esc(sectorName(ctx, current))} · ${esc(opts.lockedReason)}</span>`;
+  const where = current === null ? 'Reserve' : f.canSpread ? (current === 'spread' ? 'General support' : `Fires · ${current}`) : `${ech === 'second' ? '2nd' : '1st'} echelon · ${current}`;
   return `
     <li class="formation${current !== null ? ' committed' : ''}${movable ? '' : ' locked-card'}">
       <div class="formation-head">
-        <span class="formation-name" title="${esc(f.name)}">${esc(f.short)}</span>
+        <button type="button" class="formation-name linkish${opts.selected === f.id ? ' sel' : ''}" data-action="select" data-formation="${f.id}" title="Select on the map">${esc(f.short)}</button>
         <span class="formation-full">${esc(f.name)}</span>
         <span class="formation-pot" title="Combat potential (T-55 = 1.0)">${p.overall.toFixed(1)}</span>
       </div>
-      <div class="equip">${equipmentSummary(units)}</div>
+      <div class="equip">${esc(where)} · ${equipmentSummary(units)}</div>
       <div class="chips">${categoryChips(p)}${lossy ? `<span class="chip warn">${pct(1 - p.overall / strength)} lost</span>` : ''}</div>
       ${notes.length ? `<div class="note">${notes.join('<br>')}</div>` : ''}
       <div class="assign-row" role="group" aria-label="Assign ${esc(f.short)}">${buttons}</div>
@@ -308,11 +317,24 @@ function renderSector(ctx: TdgContext, s: TdgState, r: SectorResult, opts: Force
       </label>
       ${roleNote ? `<p class="note">${esc(roleNote)}</p>` : ''}
       <div class="committed-list">${committed}</div>
+      ${renderContact(ctx, s, r)}
       <table>
         <thead><tr><th></th><th class="num">SOV</th><th class="num" title="Estimated NATO potential">NATO</th><th>Ratio</th><th class="num">Norm</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </section>`;
+}
+
+function renderContact(ctx: TdgContext, s: TdgState, r: SectorResult): string {
+  const name = (id: string) => esc(s.estimate.find((u) => u.id === id)?.name ?? s.nato.find((u) => u.id === id)?.name ?? id);
+  const short = (id: string) => esc(ctx.era.soviet.formations.find((f) => f.id === id)?.short ?? id);
+  const parts: string[] = [];
+  if (r.engaged.length) parts.push(`Engages: ${r.engaged.map(name).join(', ')}`);
+  if (r.bypassed.length) parts.push(`Bypasses: ${r.bypassed.map(name).join(', ')}`);
+  if (r.encircled.length) parts.push(`<strong>Encircles</strong>: ${r.encircled.map(name).join(', ')}`);
+  if (r.secondEchelon.length) parts.push(`2nd echelon: ${r.secondEchelon.map(short).join(', ')}`);
+  const terrain = r.terrain !== 1 ? `<span class="chip" title="NATO potential is multiplied by the terrain it holds">Terrain ×${r.terrain.toFixed(2)}</span>` : '';
+  return parts.length || terrain ? `<p class="contact">${terrain} ${parts.join(' · ')}</p>` : '';
 }
 
 function renderNatoUnit(ctx: TdgContext, u: Unit): string {
@@ -381,7 +403,7 @@ function renderFindings(ctx: TdgContext, s: TdgState): string {
   return `<details class="findings" open><summary>Intelligence reports (${s.findings.length})</summary><ul>${items}</ul></details>`;
 }
 
-export function renderPlanning(ctx: TdgContext, s: TdgState, result: PlanResult, timer: { seconds: number } | null): string {
+export function renderPlanning(ctx: TdgContext, s: TdgState, result: PlanResult, timer: { seconds: number } | null, mapBlock: string, selected: string | null): string {
   const left = hoursLeft(ctx, s);
   const cost = ctx.era.recon.hoursPerSector;
   const k = currentReadiness(ctx, s);
@@ -393,7 +415,7 @@ export function renderPlanning(ctx: TdgContext, s: TdgState, result: PlanResult,
         title="${done ? 'Already reconnoitred' : `Spend ${cost} h to see what is really in ${esc(sec.name)}`}">${done ? '✓ ' : ''}Recon ${sec.id}</button>`;
     })
     .join('');
-  const opts: ForcesOpts = { editableRoles: true, isMovable: () => true, lockedReason: '' };
+  const opts: ForcesOpts = { editableRoles: true, isMovable: () => true, lockedReason: '', selected };
   return `
     <main>
       <div class="actionbar sticky">
@@ -406,6 +428,7 @@ export function renderPlanning(ctx: TdgContext, s: TdgState, result: PlanResult,
       </div>
       ${errorLine(s)}
       ${renderFindings(ctx, s)}
+      ${mapBlock}
       ${LEGEND(ctx.era.norms.amberFraction)}
       ${renderForces(ctx, s, result, opts)}
     </main>`;
@@ -437,7 +460,7 @@ function renderPhaseSummary(ctx: TdgContext, sectors: SectorOutcome[]): string {
     .join('');
 }
 
-export function renderDecision(ctx: TdgContext, s: TdgState, result: PlanResult, timer: { seconds: number } | null): string {
+export function renderDecision(ctx: TdgContext, s: TdgState, result: PlanResult, timer: { seconds: number } | null, mapBlock: string, selected: string | null): string {
   const p1 = s.phase1!;
   const target = s.reaction?.sectorId ? ctx.scenario.sectors.find((x) => x.id === s.reaction!.sectorId) : null;
   const roles = phase2Roles(ctx, s);
@@ -457,6 +480,7 @@ export function renderDecision(ctx: TdgContext, s: TdgState, result: PlanResult,
     editableRoles: false,
     isMovable: (id) => movableInDecision(ctx, s, id),
     lockedReason: 'in contact',
+    selected,
   };
   return `
     <main>
@@ -473,6 +497,7 @@ export function renderDecision(ctx: TdgContext, s: TdgState, result: PlanResult,
       </section>
       ${errorLine(s)}
       ${renderFindings(ctx, s)}
+      ${mapBlock}
       ${renderForces(ctx, s, result, opts)}
     </main>`;
 }
@@ -525,7 +550,7 @@ function verdictText(ctx: TdgContext, s: TdgState): string {
   return parts.join(' ');
 }
 
-export function renderDebrief(ctx: TdgContext, s: TdgState, d: Debrief): string {
+export function renderDebrief(ctx: TdgContext, s: TdgState, d: Debrief, mapBlock: string): string {
   const f = s.final!;
   const planned = s.committed!.planned;
   const rows = ctx.scenario.sectors
@@ -605,6 +630,12 @@ export function renderDebrief(ctx: TdgContext, s: TdgState, d: Debrief): string 
           <thead><tr><th>Sector</th><th>Planned</th><th>Actual</th><th>Phase 1</th><th>Phase 2</th></tr></thead>
           <tbody>${rows}</tbody>
         </table></div>
+      </section>
+
+      <section class="panel">
+        <h2>The battlefield</h2>
+        <p class="note">True NATO positions at H-hour, your committed axes, and how each unit was met in phase 1.</p>
+        ${mapBlock}
       </section>
 
       <section class="panel">

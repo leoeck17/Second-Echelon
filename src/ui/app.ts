@@ -2,9 +2,11 @@
 // countdown and re-renders. All game logic lives in core/ and planning/.
 
 import type { EquipmentTable, EraData, Placement, Scenario } from '../core/data';
-import { evaluatePlan } from '../planning/plan';
+import type { MapData } from '../core/terrain';
+import { evaluatePlan, type PlanResult } from '../planning/plan';
 import {
   initialState,
+  movableInDecision,
   planContext,
   rateAgainstEstimate,
   simulate,
@@ -14,6 +16,8 @@ import {
   type TdgState,
   type Verdict,
 } from '../planning/tdg';
+import { escapeHtml } from './format';
+import { attachMapInput, renderMap } from './map';
 import { Countdown } from './timer';
 import { formatClock, renderBriefing, renderDebrief, renderDecision, renderHeader, renderMenu, renderPlanning, type Debrief } from './views';
 
@@ -40,8 +44,12 @@ function save(key: string, value: unknown): void {
 
 type Screen = { kind: 'menu' } | { kind: 'game'; ctx: TdgContext; state: TdgState; debrief?: Debrief };
 
-export function mountApp(root: HTMLElement, era: EraData, table: EquipmentTable, scenarios: Scenario[]): void {
-  const contexts = scenarios.map((scenario): TdgContext => ({ era, scenario, table }));
+export function mountApp(root: HTMLElement, era: EraData, table: EquipmentTable, scenarios: Scenario[], maps: Record<string, MapData>): void {
+  const contexts = scenarios.map((scenario): TdgContext => ({ era, scenario, table, map: maps[scenario.map]! }));
+  // Map interaction state (UI only, not part of the game state).
+  let selected: string | null = null;
+  let mode: 'move' | 'axis' = 'move';
+  let zoom = window.innerWidth < 700 ? 2.5 : 1;
   let screen: Screen = { kind: 'menu' };
   let timerOn = load<boolean>(TIMER_KEY, true);
   const best = load<Record<string, Verdict>>(BEST_KEY, {});
@@ -107,7 +115,70 @@ export function mountApp(root: HTMLElement, era: EraData, table: EquipmentTable,
     if (prev.phase !== next.phase) window.scrollTo({ top: 0 });
   }
 
+  const movable = (ctx: TdgContext, s: TdgState, id: string) =>
+    s.phase === 'planning' || (s.phase === 'decision' && movableInDecision(ctx, s, id));
+
+  function renderMapBlock(ctx: TdgContext, s: TdgState, contacts: PlanResult['contacts'] | undefined): string {
+    const sel = selected ? ctx.era.soviet.formations.find((f) => f.id === selected) : undefined;
+    const canMove = !!sel && movable(ctx, s, sel.id);
+    const hint = !sel
+      ? 'Tap a unit (on the map or its name in the list) to select it, or drag it to a new position.'
+      : !canMove
+        ? `${sel.short} is in contact and cannot be moved.`
+        : mode === 'axis'
+          ? `Tap the map to add a waypoint to ${sel.short}'s axis of advance. It continues west from the last waypoint.`
+          : `Tap the map to move ${sel.short} there, or drag it. Depth bands set the echelon.`;
+    const tools = sel && canMove
+      ? `<button type="button" data-action="mode-move" aria-pressed="${mode === 'move'}" class="${mode === 'move' ? 'on' : ''}">Move</button>
+         ${sel.canSpread ? '' : `<button type="button" data-action="mode-axis" aria-pressed="${mode === 'axis'}" class="${mode === 'axis' ? 'on' : ''}">Draw axis</button>
+         <button type="button" data-action="axis-undo">Undo point</button>
+         <button type="button" data-action="axis-clear">Straight axis</button>`}
+         <button type="button" data-action="deselect">Done</button>`
+      : '';
+    return `
+      <section class="panel map-panel" aria-label="Map">
+        <div class="map-toolbar">
+          <span class="map-hint">${escapeHtml(hint)}</span>
+          <span class="map-tools">${tools}
+            <button type="button" data-action="zoom-out" title="Zoom out">−</button>
+            <button type="button" data-action="zoom-in" title="Zoom in">+</button></span>
+        </div>
+        ${renderMap(ctx, {
+          plan: s.plan,
+          nato: s.estimate,
+          contacts,
+          selected,
+          isMovable: (id) => movable(ctx, s, id),
+          zoom,
+        })}
+      </section>`;
+  }
+
+  function renderDebriefMap(ctx: TdgContext, s: TdgState): string {
+    const truthIds = new Set(ctx.scenario.nato.truth.map((u) => u.id));
+    const estIds = new Set(ctx.scenario.nato.estimate.map((u) => u.id));
+    const tags: Record<string, string> = {};
+    for (const id of s.encircled ?? []) tags[id] = 'encircled';
+    for (const id of s.cutOff ?? []) tags[id] = 'cut off';
+    for (const u of ctx.scenario.nato.truth) if (!estIds.has(u.id)) tags[u.id] = 'unreported';
+    const dummies = ctx.scenario.nato.estimate
+      .filter((u) => !truthIds.has(u.id))
+      .map((u) => ({ ...u, intel: { status: 'unknown' as const, low: 0, high: 0 } }));
+    for (const u of dummies) tags[u.id] = 'dummy';
+    return renderMap(ctx, {
+      plan: s.plan,
+      nato: [...ctx.scenario.nato.truth, ...dummies],
+      tags,
+      contacts: s.contacts1,
+      selected: null,
+      isMovable: () => false,
+      zoom,
+    });
+  }
+
   function openScenario(id: string): void {
+    selected = null;
+    mode = 'move';
     const ctx = contexts.find((c) => c.scenario.id === id);
     if (!ctx) return;
     countdown.stop();
@@ -137,13 +208,53 @@ export function mountApp(root: HTMLElement, era: EraData, table: EquipmentTable,
     const timer = left !== null ? { seconds: left } : null;
     let body = '';
     if (s.phase === 'briefing') body = renderBriefing(ctx, s, timerOn);
-    else if (s.phase === 'planning') body = renderPlanning(ctx, s, rateAgainstEstimate(ctx, s), timer);
-    else if (s.phase === 'decision') body = renderDecision(ctx, s, rateAgainstEstimate(ctx, s), timer);
-    else body = renderDebrief(ctx, s, screen.debrief ?? buildDebrief(ctx, s));
+    else if (s.phase === 'planning' || s.phase === 'decision') {
+      const result = rateAgainstEstimate(ctx, s);
+      const mapBlock = renderMapBlock(ctx, s, result.contacts);
+      body = s.phase === 'planning'
+        ? renderPlanning(ctx, s, result, timer, mapBlock, selected)
+        : renderDecision(ctx, s, result, timer, mapBlock, selected);
+    } else body = renderDebrief(ctx, s, screen.debrief ?? buildDebrief(ctx, s), renderDebriefMap(ctx, s));
+    // Keep the map's scroll position across re-renders.
+    const sc = root.querySelector<HTMLElement>('#map-scroll');
+    const keep = sc ? { left: sc.scrollLeft, top: sc.scrollTop } : null;
     root.innerHTML = `${header}${body}
       <footer class="foot muted">Potentials in T-55 equivalents. Ratios are Soviet ÷ estimated NATO; small figures show the
-        range implied by the intelligence estimate. Norms already include the defender's terrain and preparation.</footer>`;
+        range implied by the intelligence estimate. NATO potential is multiplied by the terrain it holds.</footer>`;
+    const sc2 = root.querySelector<HTMLElement>('#map-scroll');
+    if (sc2 && keep) {
+      sc2.scrollLeft = keep.left;
+      sc2.scrollTop = keep.top;
+    } else if (sc2 && zoom > 1) {
+      sc2.scrollLeft = sc2.scrollWidth - sc2.clientWidth; // start at the Soviet (east) side
+    }
   }
+
+  function game(): { ctx: TdgContext; state: TdgState } | null {
+    return screen.kind === 'game' ? screen : null;
+  }
+
+  attachMapInput(root, {
+    select: (fid) => {
+      selected = selected === fid ? null : fid;
+      mode = 'move';
+      render();
+    },
+    drop: (fid, pos) => {
+      selected = fid;
+      dispatch({ type: 'place', formationId: fid, pos });
+    },
+    tap: (pos) => {
+      const g = game();
+      if (!g || !selected || !movable(g.ctx, g.state, selected)) return;
+      if (mode === 'axis') {
+        const waypoints = [...(g.state.plan.axes[selected] ?? []), pos];
+        dispatch({ type: 'setAxis', formationId: selected, waypoints });
+      } else {
+        dispatch({ type: 'place', formationId: selected, pos });
+      }
+    },
+  });
 
   root.addEventListener('click', (ev) => {
     const el = (ev.target as HTMLElement).closest<HTMLElement>('[data-action]');
@@ -163,9 +274,40 @@ export function mountApp(root: HTMLElement, era: EraData, table: EquipmentTable,
         const sel = `.assign[data-formation="${d.formation}"][data-placement="${d.placement ?? ''}"]`;
         return dispatch({ type: 'assign', formationId: d.formation!, placement }, sel);
       }
+      case 'second':
+        return dispatch({ type: 'second', formationId: d.formation!, sectorId: d.placement! });
+      case 'select':
+        selected = selected === d.formation ? null : d.formation!;
+        mode = 'move';
+        render();
+        root.querySelector('#map-scroll')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      case 'deselect':
+        selected = null;
+        mode = 'move';
+        return render();
+      case 'mode-move':
+        mode = 'move';
+        return render();
+      case 'mode-axis':
+        mode = 'axis';
+        return render();
+      case 'axis-undo':
+      case 'axis-clear': {
+        const g = game();
+        if (!g || !selected) return;
+        const cur = g.state.plan.axes[selected] ?? [];
+        return dispatch({ type: 'setAxis', formationId: selected, waypoints: d.action === 'axis-undo' ? cur.slice(0, -1) : [] });
+      }
+      case 'zoom-in':
+      case 'zoom-out':
+        zoom = Math.max(1, Math.min(4, zoom * (d.action === 'zoom-in' ? 1.5 : 1 / 1.5)));
+        return render();
       case 'commit':
+        selected = null;
         return dispatch({ type: 'commit' });
       case 'decide':
+        selected = null;
         return dispatch({ type: 'decide' });
       case 'replay':
         return dispatch({ type: 'restart' });

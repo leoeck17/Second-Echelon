@@ -322,3 +322,109 @@ main > .legend { padding: 8px 16px 0; }
   .actionbar.sticky .recon { font-size: 12px; gap: 4px 8px; }
   .timer { font-size: 18px; }
 }
+
+/* ---------- Map ---------- */
+
+:root {
+  --map-open: #ecebd9;
+  --map-forest: #b9d3a4;
+  --map-town: #c9c3b8;
+  --map-water: #a9cbe6;
+  --map-marsh: #cfe0cf;
+  --map-ridge: #dccaa6;
+  --map-road: #8a7a62;
+  --map-river: #4b8fc7;
+  --map-ink: #3b3a33;
+  --sov: #b3261e;
+  --sov-text: #ffffff;
+  --nato: #1f5fa8;
+  --nato-text: #ffffff;
+  --axis: #b3261e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --map-open: #2b2e27;
+    --map-forest: #2f4a2b;
+    --map-town: #4a4741;
+    --map-water: #23435f;
+    --map-marsh: #33463a;
+    --map-ridge: #4d4231;
+    --map-road: #a8977a;
+    --map-river: #5aa2df;
+    --map-ink: #dcdad2;
+    --sov: #e0574d;
+    --nato: #5b9be0;
+    --axis: #ff7a70;
+  }
+}
+:root[data-theme='dark'] {
+  --map-open: #2b2e27; --map-forest: #2f4a2b; --map-town: #4a4741; --map-water: #23435f; --map-marsh: #33463a;
+  --map-ridge: #4d4231; --map-road: #a8977a; --map-river: #5aa2df; --map-ink: #dcdad2; --sov: #e0574d; --nato: #5b9be0; --axis: #ff7a70;
+}
+
+.map-panel { margin: 12px 16px 0; padding: 8px; }
+.map-toolbar { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+.map-hint { color: var(--muted); flex: 1 1 260px; }
+.map-tools { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.map-tools button.on { background: var(--on); color: var(--on-text); border-color: var(--on); }
+.map-scroll { overflow: auto; max-height: 75vh; border: 1px solid var(--border); border-radius: 4px; -webkit-overflow-scrolling: touch; }
+.map { display: block; height: auto; user-select: none; -webkit-user-select: none; }
+.debrief .map-scroll { max-height: none; }
+
+.map-open { fill: var(--map-open); }
+.map-forest { fill: var(--map-forest); }
+.map-town { fill: var(--map-town); stroke: var(--map-ink); stroke-width: 30; stroke-opacity: 0.4; }
+.map-water { fill: var(--map-water); }
+.map-marsh { fill: var(--map-marsh); stroke: var(--map-river); stroke-width: 25; stroke-dasharray: 80 80; }
+.map-ridge { fill: var(--map-ridge); opacity: 0.8; }
+.map-road { fill: none; stroke: var(--map-road); stroke-width: 90; stroke-linejoin: round; }
+.map-river { fill: none; stroke: var(--map-river); stroke-width: 110; stroke-linejoin: round; }
+.map-ridgeline { fill: none; stroke: var(--map-ink); stroke-width: 40; stroke-dasharray: 200 120; opacity: 0.5; }
+.map-crossing { fill: var(--map-open); stroke: var(--map-ink); stroke-width: 40; }
+.map-place { fill: var(--map-ink); font-size: 380px; font-style: italic; text-anchor: middle; opacity: 0.8; pointer-events: none; }
+
+.band { fill: var(--sov); pointer-events: none; }
+.band-0 { opacity: 0.1; } .band-1 { opacity: 0.06; } .band-2 { opacity: 0.03; } .band-3 { opacity: 0.08; }
+.band-label { fill: var(--map-ink); font-size: 300px; text-anchor: middle; opacity: 0.7; pointer-events: none; }
+.lane { stroke: var(--map-ink); stroke-width: 30; stroke-dasharray: 250 180; opacity: 0.5; pointer-events: none; }
+.lane-label { fill: var(--map-ink); font-size: 700px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; opacity: 0.35; pointer-events: none; }
+.flot { stroke: var(--sov); stroke-width: 60; stroke-dasharray: 300 150; pointer-events: none; }
+.flot-label { fill: var(--sov); font-size: 300px; text-anchor: end; pointer-events: none; }
+.objective circle { fill: none; stroke: var(--sov); stroke-width: 80; }
+.objective text { fill: var(--sov); font-size: 320px; text-anchor: middle; }
+.objective { pointer-events: none; }
+.compass path { fill: var(--map-ink); } .compass text { fill: var(--map-ink); font-size: 360px; text-anchor: middle; font-weight: 700; }
+.compass { pointer-events: none; }
+
+.axis { fill: none; stroke: var(--axis); stroke-width: 110; stroke-linejoin: round; opacity: 0.75; pointer-events: none; }
+.axis.pending { stroke-dasharray: 260 160; opacity: 0.5; }
+.axis.selected { stroke-width: 170; opacity: 1; }
+.arrow-head { fill: var(--axis); }
+.waypoint { fill: var(--axis); pointer-events: none; }
+
+.nato-mark rect { fill: var(--nato); stroke: var(--panel); stroke-width: 50; }
+.nato-mark text { fill: var(--nato-text); font-size: 300px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+.nato-mark .mark-tag { fill: var(--nato); font-weight: 600; font-size: 260px; }
+.nato-mark.suspected rect { fill-opacity: 0.55; stroke: var(--nato); stroke-dasharray: 120 80; }
+.nato-mark.unknown rect { fill: none; stroke: var(--nato); stroke-dasharray: 60 60; }
+.nato-mark.unknown text:not(.mark-tag) { fill: var(--nato); }
+.nato-mark.engaged rect { stroke: var(--sov); stroke-width: 90; }
+.nato-mark.encircled rect, .nato-mark.bypassed rect { stroke: var(--amber); stroke-width: 90; }
+
+.sov-counter { cursor: grab; touch-action: none; }
+.sov-counter rect { fill: var(--sov); stroke: var(--panel); stroke-width: 50; }
+.sov-counter.fires rect { fill: var(--panel); stroke: var(--sov); stroke-width: 90; }
+.sov-counter.fires text { fill: var(--sov); }
+.sov-counter.ech-second rect { fill-opacity: 0.7; }
+.sov-counter.ech-reserve rect { fill-opacity: 0.45; }
+.sov-counter text { fill: var(--sov-text); font-size: 280px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+.sov-counter.selected rect { stroke: var(--text); stroke-width: 130; }
+.sov-counter.dragging { cursor: grabbing; opacity: 0.85; }
+.sov-counter.locked { cursor: default; }
+.sov-counter.locked rect { fill-opacity: 0.6; }
+
+.assign-label { font-size: 11px; color: var(--muted); align-self: center; margin: 0 2px 0 4px; }
+.assign-label:first-child { margin-left: 0; }
+.formation-name.sel { text-decoration: underline; color: var(--accent); }
+.contact { font-size: 12px; margin: 0 0 6px; color: var(--muted); }
+.contact .chip { margin-right: 4px; }

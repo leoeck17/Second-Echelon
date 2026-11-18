@@ -1,0 +1,248 @@
+{
+  "id": "1970s-04-strongpoint",
+  "era": "1970s",
+  "title": "4. The strongpoint",
+  "brief": "The task force has turned Altdorf into a strongpoint: a tank-heavy team dug in among the houses, its reserve behind the village. North and south of it only thin screens hold the forest edge and the open ground. A frontal attack on the village will bleed the regiment. Draw your axes around it.",
+  "seed": 1979,
+  "planningHours": 4,
+  "timeLimitSec": {"planning": 600, "decision": 180},
+  "map": "central-01",
+  "geometry": {
+    "lineOfContactX": 15000,
+    "bands": {
+      "first": [15000, 17000],
+      "second": [17000, 19500],
+      "reserve": [19500, 22500],
+      "generalSupport": [22500, 25000]
+    },
+    "objectiveX": 5000,
+    "objectives": [
+      {"id": "immediate", "name": "Immediate objective: Altdorf crossroads", "x": 11000, "y": 7500},
+      {"id": "subsequent", "name": "Subsequent objective: Neuhof", "x": 4000, "y": 7500}
+    ],
+    "reactionX": 9500
+  },
+  "sectors": [
+    {
+      "id": "A",
+      "name": "Sector A (forest edge)",
+      "widthKm": 3,
+      "defaultRole": "attack",
+      "yRange": [9000, 12000]
+    },
+    {
+      "id": "B",
+      "name": "Sector B (village, crossroads)",
+      "widthKm": 3,
+      "defaultRole": "attack",
+      "yRange": [6000, 9000]
+    },
+    {
+      "id": "C",
+      "name": "Sector C (open ground)",
+      "widthKm": 3,
+      "defaultRole": "attack",
+      "yRange": [3000, 6000]
+    }
+  ],
+  "nato": {
+    "name": "US Mech Battalion Task Force",
+    "formations": [
+      {"id": "TF", "name": "US Mechanized Battalion Task Force (mech-heavy)", "short": "TF", "kind": "task-force", "canSpread": false},
+      {"id": "SPT", "name": "Supporting artillery", "short": "Arty", "kind": "artillery", "canSpread": true},
+      {"id": "BDE", "name": "Brigade reserve", "short": "Bde Res", "kind": "reserve", "canSpread": false}
+    ],
+    "estimate": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Scout screen (forest edge)",
+        "parent": "TF",
+        "equipment": {"M113": 5, "Dragon": 3, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "pos": {"x": 12800, "y": 10600},
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "A scout platoon reinforced with a TOW section"
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (tank-heavy, Altdorf strongpoint)",
+        "parent": "TF",
+        "equipment": {"M60A1": 10, "M113": 9, "Dragon": 6, "TOW": 6},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "pos": {"x": 12000, "y": 7400},
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Dug in among the houses; TOWs cover the main road"
+      },
+      {
+        "id": "TM-T",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 4, "Dragon": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "pos": {"x": 10200, "y": 7800},
+        "intel": {"status": "suspected", "low": 0.7, "high": 1.3},
+        "note": "Behind the village, ready to counterattack"
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Mech platoon screen (open ground)",
+        "parent": "TF",
+        "equipment": {"M113": 5, "Dragon": 3, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "pos": {"x": 13200, "y": 4700},
+        "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
+        "note": "Thin screen on the open ground"
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "pos": {"x": 9000, "y": 7000},
+        "intel": {"status": "suspected", "low": 0.75, "high": 1.25},
+        "note": "Can fire into any sector"
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "pos": {"x": 5000, "y": 6000},
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Share of the brigade's direct-support battalion"
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve",
+        "pos": {"x": 3000, "y": 9500},
+        "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
+        "note": "Not in any sector; may reinforce the main threat"
+      }
+    ],
+    "truth": [
+      {
+        "id": "TM-A",
+        "side": "NATO",
+        "name": "Scout screen (forest edge)",
+        "parent": "TF",
+        "equipment": {"M113": 5, "Dragon": 3, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "A",
+        "pos": {"x": 12800, "y": 10600}
+      },
+      {
+        "id": "TM-B",
+        "side": "NATO",
+        "name": "Team B (tank-heavy, Altdorf strongpoint)",
+        "parent": "TF",
+        "equipment": {"M60A1": 10, "M113": 9, "Dragon": 6, "TOW": 6},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "pos": {"x": 12000, "y": 7400}
+      },
+      {
+        "id": "TM-T",
+        "side": "NATO",
+        "name": "Team Tank (TF reserve)",
+        "parent": "TF",
+        "equipment": {"M60A1": 7, "M113": 4, "Dragon": 3},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "B",
+        "pos": {"x": 10200, "y": 7800}
+      },
+      {
+        "id": "TM-C",
+        "side": "NATO",
+        "name": "Mech platoon screen (open ground)",
+        "parent": "TF",
+        "equipment": {"M113": 5, "Dragon": 3, "TOW": 2},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "C",
+        "pos": {"x": 13200, "y": 4700}
+      },
+      {
+        "id": "HMP",
+        "side": "NATO",
+        "name": "Heavy Mortar Plt",
+        "parent": "TF",
+        "equipment": {"M106A1": 4},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "pos": {"x": 9000, "y": 7000}
+      },
+      {
+        "id": "DS-FA",
+        "side": "NATO",
+        "name": "2 Btrys, DS Field Artillery Bn",
+        "parent": "SPT",
+        "equipment": {"M109A1": 12},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "spread",
+        "pos": {"x": 5000, "y": 6000}
+      },
+      {
+        "id": "BDE-RES",
+        "side": "NATO",
+        "name": "Brigade reserve tank coy",
+        "parent": "BDE",
+        "equipment": {"M60A1": 17},
+        "strength": 1.0,
+        "readiness": 1.0,
+        "placement": "reserve",
+        "pos": {"x": 3000, "y": 9500}
+      }
+    ]
+  },
+  "natoReaction": {
+    "units": ["BDE-RES"],
+    "rule": "most-threatened",
+    "text": "The brigade reserve tank company counterattacks toward the Soviet main effort: the sector with the most Soviet combat power."
+  },
+  "schoolSolution": {
+    "recon": [],
+    "plan": {
+      "assignment": {"TB": "C", "3MRB": "C", "1MRB": "A", "2MRB": "A", "RAB": "A", "DAB": "C", "AAB": "C", "ATB": "C"},
+      "roles": {"A": "attack", "B": "holding", "C": "breakthrough"},
+      "axes": {
+        "TB": [{"x": 12500, "y": 5100}],
+        "3MRB": [{"x": 12500, "y": 5100}],
+        "1MRB": [{"x": 12500, "y": 9800}],
+        "2MRB": [{"x": 12500, "y": 9800}]
+      }
+    },
+    "decision": {"RECON": "C"},
+    "text": "Leave the village alone. Push a motor rifle pincer through the screen at the forest edge and the tank-heavy arm across the open ground, both swinging in behind Altdorf. If both arms break through, the strongpoint is encircled and withers; the brigade reserve meets your main effort in C."
+  }
+}
