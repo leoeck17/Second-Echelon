@@ -65,7 +65,7 @@ The player plans at battalion level and the simulation runs at company level. Th
 
 **NATO opponent:** a US mechanized battalion task force or a Bundeswehr Panzergrenadier battalion, company teams in battle positions, with brigade reserve and artillery behind it.
 
-**Map scale:** about 15 km wide by 25 km deep, hexes of 500 m. That fits a regimental attack zone plus the depth of the subsequent objective.
+**Map scale:** a continuous map about 25 km deep (east–west, the direction of attack) by 15 km wide, in metres. That fits a regimental attack zone plus the depth of the subsequent objective.
 
 **What changes between eras** (approximate, to verify per scenario):
 
@@ -120,7 +120,7 @@ Here c is the coefficient of each weapon type, n the number held, and P-hat the 
 
 The simulation uses the same combat potential numbers as the planner, plus everything the planner cannot see: terrain, fortification, suppression, morale and chance. That is what makes a good plan likely, but never certain, to work.
 
-**Map.** Hex grid, 500 m per hex. Terrain types: open, broken, forest, town, river (with crossing points), ridge; roads and bridges as hex-side features. The first map is fictional but Central-Front-like; a real-terrain map can follow later.
+**Map.** Continuous, in metres (GeoJSON). Terrain types: open, forest, town, water, marsh, ridge; rivers with crossing points; roads. The first map is fictional but Central-Front-like; a real-terrain map can follow later.
 
 **Movement.** Speed per unit type and terrain, slower in combat formation than in march column. Time step of 1 simulated minute.
 
@@ -152,7 +152,7 @@ Build it as a static browser app in TypeScript with Vite, with the simulation ke
 **Stack**
 
 - TypeScript + Vite, no backend; hosts free on GitHub Pages
-- Rendering: HTML Canvas for the hex map, plain HTML/CSS for panels
+- Rendering: SVG for the map, plain HTML/CSS for panels
 - All game content in JSON files (equipment, units, scenarios, eras)
 - Seeded random number generator, so a battle can be replayed exactly
 - Vitest for unit tests of the COFM and combat functions
@@ -199,7 +199,7 @@ Build the COFM calculator first, without a map: it is the heart of the game and 
 
 1. **M0 – Data and COFM core.** Equipment and unit JSON for the 1970s; `cofm.ts` with tests. A screen listing both forces, three sectors, and live ratios against the norms.
 2. **M0.5 – Tactical decision game.** Playable without a map: scenarios with a hidden true NATO deployment, recon that costs planning time, an abstract adjudication step (`adjudicate.ts`: COFM score × seeded chance → outcome and losses), the NATO reserve reacting to the main effort, one mid-battle decision (commit the second echelon, shift fires), an optional timer, and a debrief against the truth and a school solution. M3's simulation later replaces `adjudicate.ts` behind the same phase interface; the scenarios carry over.
-3. **M1 – Map and deployment.** Hex map, terrain, units placed on it; drag battalions into sectors and echelons.
+3. **M1 – Map and deployment.** A continuous map (GeoJSON in metres, north up, Soviets attacking east to west) with terrain that strengthens the defender and slows the attacker; battalions placed by dragging, the depth band setting the echelon; axes of advance that engage, bypass or encircle NATO positions.
 4. **M2 – Fire planning.** Artillery groups, preparation length, tubes-per-km check.
 5. **M3 – Execution.** Movement, combat, suppression, breaking point; speed controls and decision points.
 6. **M4 – NATO AI.** Active Defense profile with role-based triggers.

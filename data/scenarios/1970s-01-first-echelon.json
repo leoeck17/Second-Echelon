@@ -6,10 +6,44 @@
   "seed": 1971,
   "planningHours": 6,
   "timeLimitSec": {"planning": 600, "decision": 180},
+  "map": "central-01",
+  "geometry": {
+    "lineOfContactX": 15000,
+    "bands": {
+      "first": [15000, 17000],
+      "second": [17000, 19500],
+      "reserve": [19500, 22500],
+      "generalSupport": [22500, 25000]
+    },
+    "objectiveX": 5000,
+    "objectives": [
+      {"id": "immediate", "name": "Immediate objective: Altdorf crossroads", "x": 11000, "y": 7500},
+      {"id": "subsequent", "name": "Subsequent objective: Neuhof", "x": 4000, "y": 7500}
+    ],
+    "reactionX": 9500
+  },
   "sectors": [
-    {"id": "A", "name": "Sector A (north)", "widthKm": 2, "defaultRole": "attack"},
-    {"id": "B", "name": "Sector B (centre, main road)", "widthKm": 2, "defaultRole": "breakthrough"},
-    {"id": "C", "name": "Sector C (south)", "widthKm": 2, "defaultRole": "attack"}
+    {
+      "id": "A",
+      "name": "Sector A (north)",
+      "widthKm": 3,
+      "defaultRole": "attack",
+      "yRange": [9000, 12000]
+    },
+    {
+      "id": "B",
+      "name": "Sector B (centre, main road)",
+      "widthKm": 3,
+      "defaultRole": "breakthrough",
+      "yRange": [6000, 9000]
+    },
+    {
+      "id": "C",
+      "name": "Sector C (south)",
+      "widthKm": 3,
+      "defaultRole": "attack",
+      "yRange": [3000, 6000]
+    }
   ],
   "nato": {
     "name": "US Mech Battalion Task Force",
@@ -29,7 +63,8 @@
         "readiness": 1.0,
         "placement": "A",
         "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
-        "note": "Battle position on the forward slope, seen by division recon"
+        "note": "Battle position on the forward slope, seen by division recon",
+        "pos": {"x": 13000, "y": 10500}
       },
       {
         "id": "TM-B",
@@ -41,7 +76,8 @@
         "readiness": 1.0,
         "placement": "B",
         "intel": {"status": "confirmed", "low": 0.9, "high": 1.1},
-        "note": "Astride the main road"
+        "note": "Astride the main road",
+        "pos": {"x": 12000, "y": 7500}
       },
       {
         "id": "TM-C",
@@ -53,7 +89,8 @@
         "readiness": 1.0,
         "placement": "C",
         "intel": {"status": "suspected", "low": 0.7, "high": 1.3},
-        "note": "Composition inferred from radio intercepts; no tanks seen"
+        "note": "Composition inferred from radio intercepts; no tanks seen",
+        "pos": {"x": 12800, "y": 4500}
       },
       {
         "id": "TM-D",
@@ -65,7 +102,8 @@
         "readiness": 1.0,
         "placement": "B",
         "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
-        "note": "Believed in depth behind sector B; could counterattack into A or C"
+        "note": "Believed in depth behind sector B; could counterattack into A or C",
+        "pos": {"x": 9800, "y": 7200}
       },
       {
         "id": "HMP",
@@ -77,7 +115,8 @@
         "readiness": 1.0,
         "placement": "spread",
         "intel": {"status": "suspected", "low": 0.75, "high": 1.25},
-        "note": "Can fire into any sector"
+        "note": "Can fire into any sector",
+        "pos": {"x": 9000, "y": 7800}
       },
       {
         "id": "DS-FA",
@@ -89,7 +128,8 @@
         "readiness": 1.0,
         "placement": "spread",
         "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
-        "note": "Share of the brigade's direct-support battalion; masses on any sector"
+        "note": "Share of the brigade's direct-support battalion; masses on any sector",
+        "pos": {"x": 5000, "y": 6500}
       },
       {
         "id": "BDE-RES",
@@ -101,7 +141,8 @@
         "readiness": 1.0,
         "placement": "reserve",
         "intel": {"status": "suspected", "low": 0.5, "high": 1.5},
-        "note": "Not in any sector; may reinforce the main threat within hours"
+        "note": "Not in any sector; may reinforce the main threat within hours",
+        "pos": {"x": 3000, "y": 9500}
       }
     ],
     "truth": [
@@ -113,7 +154,8 @@
         "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "A"
+        "placement": "A",
+        "pos": {"x": 13000, "y": 10500}
       },
       {
         "id": "TM-B",
@@ -123,7 +165,8 @@
         "equipment": {"M60A1": 5, "M113": 9, "Dragon": 6, "TOW": 4, "M125A1": 3},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "B"
+        "placement": "B",
+        "pos": {"x": 12000, "y": 7500}
       },
       {
         "id": "TM-C",
@@ -134,7 +177,8 @@
         "strength": 1.0,
         "readiness": 1.0,
         "placement": "C",
-        "note": "A tank platoon was cross-attached the night before; division recon missed it."
+        "note": "A tank platoon was cross-attached the night before; division recon missed it.",
+        "pos": {"x": 12800, "y": 4500}
       },
       {
         "id": "TM-D",
@@ -144,7 +188,8 @@
         "equipment": {"M60A1": 7, "M113": 8, "Dragon": 6},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "B"
+        "placement": "B",
+        "pos": {"x": 9800, "y": 7200}
       },
       {
         "id": "HMP",
@@ -154,7 +199,8 @@
         "equipment": {"M106A1": 4},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "spread"
+        "placement": "spread",
+        "pos": {"x": 9000, "y": 7800}
       },
       {
         "id": "DS-FA",
@@ -164,7 +210,8 @@
         "equipment": {"M109A1": 12},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "spread"
+        "placement": "spread",
+        "pos": {"x": 5000, "y": 6500}
       },
       {
         "id": "BDE-RES",
@@ -174,7 +221,8 @@
         "equipment": {"M60A1": 17},
         "strength": 1.0,
         "readiness": 1.0,
-        "placement": "reserve"
+        "placement": "reserve",
+        "pos": {"x": 3000, "y": 9500}
       }
     ]
   },

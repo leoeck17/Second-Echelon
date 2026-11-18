@@ -2,6 +2,9 @@
 // Pure logic: no DOM access.
 
 /** COFM categories an equipment type can belong to. "other" counts toward overall only. */
+import type { Pt } from './geom';
+import type { TerrainParams } from './terrain';
+
 export const CATEGORIES = ['tanks', 'antitank', 'artillery', 'infantry', 'other'] as const;
 export type Category = (typeof CATEGORIES)[number];
 
@@ -55,6 +58,8 @@ export interface Unit {
   /** k_readiness, 0..1: training, fatigue, preparation. */
   readiness: number;
   placement?: Placement;
+  /** Map position in metres (NATO units). */
+  pos?: Pt;
   intel?: IntelEstimate;
   note?: string;
 }
@@ -93,6 +98,40 @@ export interface Sector {
   name: string;
   widthKm: number;
   defaultRole: string;
+  /** The sector's lane on the map: south and north edge in metres (lanes run east to west). */
+  yRange: [number, number];
+}
+
+export type Echelon = 'first' | 'second' | 'reserve';
+
+/** Where things are on the scenario map. The Soviets attack from the east (high x) to the west. */
+export interface Geometry {
+  lineOfContactX: number;
+  /** Depth bands east of the line of contact, as x ranges [west, east]. */
+  bands: { first: [number, number]; second: [number, number]; reserve: [number, number]; generalSupport: [number, number] };
+  /** Default end of an axis of advance (the subsequent objective's depth). */
+  objectiveX: number;
+  objectives: { id: string; name: string; x: number; y: number }[];
+  /** Depth at which the NATO reserve meets the main effort. */
+  reactionX: number;
+}
+
+/** Axes of advance: engagement, bypass and encirclement. */
+export interface AxesParams {
+  /** NATO units this close to an axis are engaged by it (m). */
+  engagementRadius: number;
+  /** An axis passing a unit within this lateral distance (but beyond the engagement radius) bypasses it (m). */
+  bypassRange: number;
+  /** Passing within this distance north and south of a unit, both getting closeDistance beyond it, encircles it (m). */
+  encircleRange: number;
+  closeDistance: number;
+  /** Share of a bypassed unit's potential that still weighs on the attack as a flank threat. */
+  flankWeight: number;
+  /** Strength lost after phase 1 by units bypassed / encircled by a successful attack. */
+  cutOffLoss: number;
+  encircledLoss: number;
+  /** Tempo multiplier = (direct distance / route cost) ^ tempoExponent. */
+  tempoExponent: number;
 }
 
 /** Planning hours left at H-hour -> readiness multiplier for the whole regiment. */
@@ -142,6 +181,8 @@ export interface EraData {
   prepTime: PrepTime;
   recon: ReconParams;
   adjudication: AdjudicationParams;
+  terrain: TerrainParams;
+  axes: AxesParams;
   soviet: Force;
 }
 
@@ -154,8 +195,9 @@ export interface NatoReaction {
 
 export interface SchoolSolution {
   recon: string[];
-  plan: { assignment: Record<string, Placement>; roles: Record<string, string> };
+  plan: { assignment: Record<string, Placement>; roles: Record<string, string>; axes?: Record<string, Pt[]> };
   decision: Record<string, Placement>;
+  decisionAxes?: Record<string, Pt[]>;
   text: string;
 }
 
@@ -167,6 +209,9 @@ export interface Scenario {
   seed: number;
   planningHours: number;
   timeLimitSec?: { planning?: number; decision?: number };
+  /** Id of the map in data/maps. */
+  map: string;
+  geometry: Geometry;
   sectors: Sector[];
   nato: {
     name: string;
@@ -255,6 +300,18 @@ export function validateEra(era: EraData, table: EquipmentTable): string[] {
   }
   const rc = era.recon;
   if (!rc || !(rc.hoursPerSector > 0) || !(rc.residualLow <= 1 && rc.residualHigh >= 1)) errors.push('recon parameters invalid');
+  const t = era.terrain;
+  if (!t) errors.push('terrain parameters missing');
+  else {
+    for (const k of ['open', 'forest', 'town', 'water', 'marsh', 'ridge'] as const) {
+      if (!(t.defence?.[k] > 0)) errors.push(`terrain.defence.${k}: missing or invalid`);
+      if (!(t.movement?.[k] > 0)) errors.push(`terrain.movement.${k}: missing or invalid`);
+    }
+  }
+  const ax = era.axes;
+  if (!ax || !(ax.engagementRadius > 0 && ax.bypassRange > ax.engagementRadius && ax.encircleRange > 0)) {
+    errors.push('axes parameters invalid');
+  }
   const a = era.adjudication;
   if (!a) {
     errors.push('adjudication parameters missing');
@@ -289,6 +346,29 @@ export function validateScenario(sc: Scenario, era: EraData, table: EquipmentTab
     const role = era.norms.roles[s.defaultRole];
     if (!role || role.selectable === false) errors.push(at(`sector ${s.id}: unknown default role "${s.defaultRole}"`));
     if (!(s.widthKm > 0)) errors.push(at(`sector ${s.id}: widthKm must be positive`));
+  }
+  const g = sc.geometry;
+  const ordered = (r: [number, number]) => Array.isArray(r) && r.length === 2 && r[0] < r[1];
+  if (!g) errors.push(at('geometry missing'));
+  else {
+    for (const [k, r] of Object.entries(g.bands)) if (!ordered(r)) errors.push(at(`band ${k} invalid`));
+    if (g.bands.first[0] < g.lineOfContactX) errors.push(at('first-echelon band must start at or east of the line of contact'));
+    if (!(g.objectiveX < g.lineOfContactX)) errors.push(at('objectiveX must lie west of the line of contact'));
+  }
+  for (const s of sc.sectors) if (!ordered(s.yRange)) errors.push(at(`sector ${s.id}: yRange invalid`));
+  const laneOf = (y: number) => sc.sectors.find((s) => y >= s.yRange[0] && y < s.yRange[1])?.id ?? null;
+  for (const [label, list] of [['estimate', sc.nato.estimate], ['truth', sc.nato.truth]] as const) {
+    for (const u of list) {
+      if (!u.pos) {
+        errors.push(at(`${label} unit ${u.id}: needs a pos`));
+        continue;
+      }
+      if (g && u.pos.x >= g.lineOfContactX) errors.push(at(`${label} unit ${u.id}: must stand west of the line of contact`));
+      const p = u.placement;
+      if (p && p !== 'spread' && p !== 'reserve' && laneOf(u.pos.y) !== p) {
+        errors.push(at(`${label} unit ${u.id}: placement ${p} does not match its position`));
+      }
+    }
   }
   const f = sc.nato.formations;
   errors.push(...checkUnits(sc.nato.estimate, f, 'NATO', `${sc.id} estimate`, era.era, table, sectorIds));

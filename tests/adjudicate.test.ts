@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { applyLosses, resolvePhase, resolveSector, sectorScore } from '../src/core/adjudicate';
 import { sectorRatios, zeroPotential, type Potential } from '../src/core/cofm';
 import type { AdjudicationParams, EquipmentTable, Placement, Unit } from '../src/core/data';
+import type { SectorFight } from '../src/core/fight';
 import { mulberry32 } from '../src/core/rng';
 import { era } from './fixtures';
 
@@ -109,14 +110,17 @@ describe('resolvePhase', () => {
   const table: EquipmentTable = {
     T: { name: 'T', type: 'tank', category: 'tanks', cp: 1, era: ['x'], basis: 'source' },
   };
-  const mk = (id: string, side: 'SOV' | 'NATO', n: number, placement: Placement): Unit => ({
-    id, side, name: id, parent: id, equipment: { T: n }, strength: 1, readiness: 1, placement,
+  const mk = (id: string, side: 'SOV' | 'NATO', n: number): Unit => ({
+    id, side, name: id, parent: id, equipment: { T: n }, strength: 1, readiness: 1,
   });
   const sectors = [
-    { id: 'A', name: 'A', widthKm: 2, defaultRole: 'attack' },
-    { id: 'B', name: 'B', widthKm: 2, defaultRole: 'attack' },
+    { id: 'A', name: 'A', widthKm: 2, defaultRole: 'attack', yRange: [0, 1000] as [number, number] },
+    { id: 'B', name: 'B', widthKm: 2, defaultRole: 'attack', yRange: [1000, 2000] as [number, number] },
   ];
-  const run = (seed: number) =>
+  const fight = (id: string, soviet: Record<string, number>, nato: Record<string, number>, terrain = 1): SectorFight => ({
+    sectorId: id, soviet, nato, flank: {}, engaged: Object.keys(nato), bypassed: [], encircled: [], terrain,
+  });
+  const run = (seed: number, terrainA = 1) =>
     resolvePhase({
       seed,
       phase: 1,
@@ -125,10 +129,9 @@ describe('resolvePhase', () => {
       norms: era.norms,
       params: { ...p, epsilonLow: 0.8, epsilonHigh: 1.2 },
       table,
-      soviet: [mk('s1', 'SOV', 40, 'A')],
-      sovPlacement: (x) => x.placement ?? null,
-      nato: [mk('n1', 'NATO', 10, 'A'), mk('n2', 'NATO', 10, 'B')],
-      natoPlacement: (x) => x.placement ?? null,
+      soviet: [mk('s1', 'SOV', 40)],
+      nato: [mk('n1', 'NATO', 10), mk('n2', 'NATO', 10)],
+      fights: { A: fight('A', { s1: 1 }, { n1: 1 }, terrainA), B: fight('B', {}, { n2: 1 }) },
     });
 
   it('fights only where Soviet forces attack', () => {
@@ -138,6 +141,21 @@ describe('resolvePhase', () => {
     expect(r.nato[1]!.strength).toBe(1);
     expect(r.soviet[0]!.strength).toBeLessThan(1);
     expect(r.nato[0]!.strength).toBeLessThan(1);
+  });
+
+  it('terrain strengthens the defender', () => {
+    expect(run(1, 1.3).sectors[0]!.score).toBeLessThan(run(1, 1).sectors[0]!.score);
+    expect(run(1, 1.3).sectors[0]!.terrain).toBe(1.3);
+  });
+
+  it('spread fires alone do not start an attack', () => {
+    const r = resolvePhase({
+      seed: 1, phase: 1, sectors, roles: { A: 'attack', B: 'attack' }, norms: era.norms, params: p, table,
+      soviet: [mk('art', 'SOV', 10)], nato: [mk('n1', 'NATO', 10)],
+      fights: { A: fight('A', { art: 0.5 }, { n1: 1 }), B: fight('B', { art: 0.5 }, {}) },
+    });
+    expect(r.sectors.every((x) => x.outcome === 'none')).toBe(true);
+    expect(r.soviet[0]!.strength).toBe(1);
   });
 
   it('is reproducible for a seed', () => {

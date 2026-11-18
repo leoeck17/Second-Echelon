@@ -1,19 +1,26 @@
 // Tactical decision game: a pure state machine over one scenario.
-//   briefing -> planning (recon, assign, commit) -> decision (phase 1 result, commit second echelon) -> debrief
+//   briefing -> planning (recon, place, axes, commit) -> decision (phase 1 result, commit
+//   second echelon) -> debrief
 // Pure logic: no DOM access, no timers. The UI dispatches actions, including "timeout".
 
 import { resolvePhase, type PhaseResult } from '../core/adjudicate';
-import { sectorPotentials, totalPotential } from '../core/cofm';
+import { applyCutOff, type Contact } from '../core/axes';
+import { totalPotential } from '../core/cofm';
 import type { EquipmentTable, EraData, Placement, Scenario, Unit } from '../core/data';
+import { weightedPotential } from '../core/fight';
 import { readinessFromPrepTime, reconSector, type ReconFinding } from '../core/fog';
+import type { Pt } from '../core/geom';
+import type { MapData } from '../core/terrain';
 import {
   assign,
+  assignSecondEchelon,
   defaultPlan,
   evaluatePlan,
-  natoPlacement,
+  placeFormation,
+  planFights,
   sanitizePlan,
+  setAxis,
   setRole,
-  sovietPlacement,
   withReadiness,
   type Plan,
   type PlanContext,
@@ -24,6 +31,7 @@ export interface TdgContext {
   era: EraData;
   scenario: Scenario;
   table: EquipmentTable;
+  map: MapData;
 }
 
 export type TdgPhase = 'briefing' | 'planning' | 'decision' | 'debrief';
@@ -64,6 +72,11 @@ export interface TdgState {
   /** Plan and its rating against the estimate, as committed. */
   committed?: { plan: Plan; planned: PlanResult };
   phase1?: PhaseResult;
+  /** How phase 1's axes met the true NATO units. */
+  contacts1?: Record<string, Contact>;
+  /** NATO units cut off or encircled by a successful phase-1 attack. */
+  cutOff?: string[];
+  encircled?: string[];
   reaction?: Reaction;
   /** Soviet units as they stand now (readiness applied, losses taken). */
   soviet: Unit[];
@@ -79,13 +92,16 @@ export type TdgAction =
   | { type: 'start' }
   | { type: 'recon'; sectorId: string }
   | { type: 'assign'; formationId: string; placement: Placement }
+  | { type: 'place'; formationId: string; pos: Pt }
+  | { type: 'second'; formationId: string; sectorId: string }
+  | { type: 'setAxis'; formationId: string; waypoints: Pt[] }
   | { type: 'setRole'; sectorId: string; role: string }
   | { type: 'commit' }
   | { type: 'decide' }
   | { type: 'timeout' }
   | { type: 'restart'; seed?: number };
 
-export const planContext = (ctx: TdgContext): PlanContext => ({ era: ctx.era, sectors: ctx.scenario.sectors });
+export const planContext = (ctx: TdgContext): PlanContext => ({ era: ctx.era, scenario: ctx.scenario, map: ctx.map });
 
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 
@@ -114,13 +130,15 @@ export function currentReadiness(ctx: TdgContext, s: TdgState): number {
   return readinessFromPrepTime(hoursLeft(ctx, s), ctx.era.prepTime);
 }
 
-/** Formations that may still be moved in the decision phase: uncommitted ones, and fire support. */
+/** In the decision, only the second echelon, the reserve and the artillery can move. */
 export function movableInDecision(ctx: TdgContext, s: TdgState, formationId: string): boolean {
   const f = ctx.era.soviet.formations.find((x) => x.id === formationId);
   if (!f) return false;
   if (f.canSpread) return true;
-  return (s.committed?.plan.assignment[formationId] ?? null) === null;
+  return s.committed?.plan.echelon[formationId] !== 'first';
 }
+
+const reactionSet = (s: TdgState) => new Set(s.reaction?.sectorId ? s.reaction.units : []);
 
 /**
  * The plan's rating against the current estimate. While planning, Soviet units get the
@@ -131,7 +149,7 @@ export function rateAgainstEstimate(ctx: TdgContext, s: TdgState): PlanResult {
   const before = s.phase === 'planning' || s.phase === 'briefing';
   const soviet = before ? withReadiness(s.soviet, currentReadiness(ctx, s)) : s.soviet;
   const plan = s.phase === 'decision' ? { ...s.plan, roles: phase2Roles(ctx, s) } : s.plan;
-  return evaluatePlan(planContext(ctx), ctx.table, plan, { soviet, nato: s.estimate });
+  return evaluatePlan(planContext(ctx), ctx.table, plan, { soviet, nato: s.estimate }, reactionSet(s));
 }
 
 /** Potential at readiness 1, so the prep-time multiplier doesn't count as a loss. */
@@ -149,6 +167,7 @@ function commit(ctx: TdgContext, s: TdgState): TdgState {
   const readiness = currentReadiness(ctx, s);
   const soviet = withReadiness(s.soviet, readiness);
   const planned = evaluatePlan(pc, ctx.table, s.plan, { soviet, nato: s.estimate });
+  const fights = planFights(pc, ctx.table, s.plan, { soviet, nato: s.nato });
   const phase1 = resolvePhase({
     seed: s.seed,
     phase: 1,
@@ -158,10 +177,14 @@ function commit(ctx: TdgContext, s: TdgState): TdgState {
     params: ctx.era.adjudication,
     table: ctx.table,
     soviet,
-    sovPlacement: sovietPlacement(s.plan),
     nato: s.nato,
-    natoPlacement,
+    fights: fights.sectors,
   });
+
+  // Units bypassed or encircled by an attack that broke through are cut off.
+  const won = new Set(phase1.sectors.filter((x) => x.outcome === 'success').map((x) => x.sectorId));
+  const cut = applyCutOff(phase1.nato, fights.contacts, won, ctx.era.axes);
+  let nato = cut.nato;
 
   // Contact reveals the sectors that were attacked.
   let estimate = s.estimate;
@@ -169,7 +192,7 @@ function commit(ctx: TdgContext, s: TdgState): TdgState {
   const attacked = phase1.sectors.filter((x) => x.outcome !== 'none');
   for (const x of attacked) {
     const before = new Map(estimate.map((u) => [u.id, u]));
-    const r = reconSector(estimate, phase1.nato, x.sectorId, ctx.era.recon);
+    const r = reconSector(estimate, nato, x.sectorId, ctx.era.recon);
     estimate = r.estimate;
     // Report only news: a unit already confirmed in this sector is no surprise.
     findings.push(
@@ -181,16 +204,17 @@ function commit(ctx: TdgContext, s: TdgState): TdgState {
   }
 
   // NATO reaction (Active Defense): the reserve moves toward the identified main effort,
-  // the attacked sector with the most Soviet combat potential committed.
+  // the attacked sector with the most Soviet combat potential committed. It counterattacks
+  // there whatever the axes do.
   const target = [...attacked].sort((a, b) => b.soviet.overall - a.soviet.overall)[0]?.sectorId ?? null;
   const reactionIds = ctx.scenario.natoReaction.units;
-  let nato = phase1.nato;
   if (target) {
-    nato = nato.map((u) => (reactionIds.includes(u.id) ? { ...u, placement: target } : u));
-    // The move is reported, but the estimate of its strength stays uncertain.
+    const lane = ctx.scenario.sectors.find((x) => x.id === target)!.yRange;
+    const pos = { x: ctx.scenario.geometry.reactionX, y: (lane[0] + lane[1]) / 2 };
+    nato = nato.map((u) => (reactionIds.includes(u.id) ? { ...u, placement: target, pos } : u));
     const note = 'Reported moving up to counterattack.';
     const known = new Set(estimate.map((u) => u.id));
-    estimate = estimate.map((u) => (reactionIds.includes(u.id) ? { ...u, placement: target, note } : u));
+    estimate = estimate.map((u) => (reactionIds.includes(u.id) ? { ...u, placement: target, pos, note } : u));
     for (const u of nato) {
       if (reactionIds.includes(u.id) && !known.has(u.id)) {
         estimate.push({ ...u, note, intel: { status: 'suspected', low: 0.75, high: 1.25 } });
@@ -204,6 +228,9 @@ function commit(ctx: TdgContext, s: TdgState): TdgState {
     readiness,
     committed: { plan: s.plan, planned },
     phase1,
+    contacts1: fights.contacts,
+    cutOff: cut.cutOff,
+    encircled: cut.encircled,
     reaction: { units: reactionIds, sectorId: target },
     soviet: phase1.soviet,
     nato,
@@ -225,6 +252,8 @@ export function phase2Roles(ctx: TdgContext, s: TdgState): Record<string, string
 const isAttackRole = (role: string) => role === 'breakthrough' || role === 'attack';
 
 function decide(ctx: TdgContext, s: TdgState): TdgState {
+  const pc = planContext(ctx);
+  const fights = planFights(pc, ctx.table, s.plan, { soviet: s.soviet, nato: s.nato }, reactionSet(s));
   const phase2 = resolvePhase({
     seed: s.seed,
     phase: 2,
@@ -234,9 +263,8 @@ function decide(ctx: TdgContext, s: TdgState): TdgState {
     params: ctx.era.adjudication,
     table: ctx.table,
     soviet: s.soviet,
-    sovPlacement: sovietPlacement(s.plan),
     nato: s.nato,
-    natoPlacement,
+    fights: fights.sectors,
   });
   // A sector counts as won if its attack (or exploitation) succeeded in phase 2.
   const wonSectors = phase2.sectors
@@ -244,13 +272,19 @@ function decide(ctx: TdgContext, s: TdgState): TdgState {
     .map((x) => x.sectorId);
   // Taking the objective needs enough of the regiment through the gap after the fighting.
   const start = nominalPotential(ctx, ctx.era.soviet.units);
-  const after = sectorPotentials(
-    phase2.soviet.map((u) => ({ ...u, readiness: 1 })),
-    sovietPlacement(s.plan),
-    ctx.scenario.sectors.map((x) => x.id),
-    ctx.table,
+  const nominal = phase2.soviet.map((u) => ({ ...u, readiness: 1 }));
+  const strongest = Math.max(
+    0,
+    ...wonSectors.map((id) => {
+      // Everything standing in that sector now: first echelon (fires counted once) and second echelon.
+      const weights: Record<string, number> = {};
+      for (const u of nominal) {
+        const f = ctx.era.soviet.formations.find((x) => x.id === u.parent)!;
+        if (s.plan.assignment[f.id] === id && !f.canSpread) weights[u.id] = 1;
+      }
+      return weightedPotential(nominal, weights, ctx.table).overall;
+    }),
   );
-  const strongest = Math.max(0, ...wonSectors.map((id) => after[id]?.overall ?? 0));
   const exploitShare = start > 0 ? strongest / start : 0;
   const objectiveTaken = wonSectors.length > 0 && exploitShare >= ctx.era.adjudication.exploitMinShare;
   const loss = regimentLoss(ctx, phase2.soviet);
@@ -269,8 +303,17 @@ function decide(ctx: TdgContext, s: TdgState): TdgState {
 
 const refuse = (s: TdgState, error: string): TdgState => ({ ...s, error });
 
+function edit(s: TdgState, f: () => Plan): TdgState {
+  try {
+    return { ...s, plan: f(), error: undefined };
+  } catch (e) {
+    return refuse(s, (e as Error).message);
+  }
+}
+
 export function tdgReducer(ctx: TdgContext, s: TdgState, a: TdgAction): TdgState {
   const pc = planContext(ctx);
+  const canMove = (id: string) => s.phase === 'planning' || (s.phase === 'decision' && movableInDecision(ctx, s, id));
   switch (a.type) {
     case 'restart':
       return initialState(ctx, a.seed ?? s.seed);
@@ -292,25 +335,20 @@ export function tdgReducer(ctx: TdgContext, s: TdgState, a: TdgAction): TdgState
         error: undefined,
       };
     }
-    case 'assign': {
-      if (s.phase === 'decision' && !movableInDecision(ctx, s, a.formationId)) {
-        return refuse(s, 'Battalions already in contact cannot be moved.');
-      }
-      if (s.phase !== 'planning' && s.phase !== 'decision') return refuse(s, 'Nothing to assign now.');
-      try {
-        return { ...s, plan: assign(pc, s.plan, a.formationId, a.placement), error: undefined };
-      } catch (e) {
-        return refuse(s, (e as Error).message);
-      }
+    case 'assign':
+    case 'second':
+    case 'place':
+    case 'setAxis': {
+      if (s.phase !== 'planning' && s.phase !== 'decision') return refuse(s, 'Nothing to move now.');
+      if (!canMove(a.formationId)) return refuse(s, 'Battalions already in contact cannot be moved.');
+      if (a.type === 'assign') return edit(s, () => assign(pc, s.plan, a.formationId, a.placement));
+      if (a.type === 'place') return edit(s, () => placeFormation(pc, s.plan, a.formationId, a.pos));
+      if (a.type === 'second') return edit(s, () => assignSecondEchelon(pc, s.plan, a.formationId, a.sectorId));
+      return edit(s, () => setAxis(pc, s.plan, a.formationId, a.waypoints));
     }
-    case 'setRole': {
+    case 'setRole':
       if (s.phase !== 'planning') return refuse(s, 'Sector roles are fixed once the plan is committed.');
-      try {
-        return { ...s, plan: setRole(pc, s.plan, a.sectorId, a.role), error: undefined };
-      } catch (e) {
-        return refuse(s, (e as Error).message);
-      }
-    }
+      return edit(s, () => setRole(pc, s.plan, a.sectorId, a.role));
     case 'commit':
       return s.phase === 'planning' ? commit(ctx, s) : refuse(s, 'There is no plan to commit now.');
     case 'decide':
@@ -324,8 +362,9 @@ export function tdgReducer(ctx: TdgContext, s: TdgState, a: TdgAction): TdgState
 
 export interface Playthrough {
   recon: string[];
-  plan: { assignment: Record<string, Placement>; roles: Record<string, string> };
+  plan: { assignment: Record<string, Placement>; roles: Record<string, string>; axes?: Record<string, Pt[]> };
   decision: Record<string, Placement>;
+  decisionAxes?: Record<string, Pt[]>;
 }
 
 /** Play a whole scenario from fixed choices; used for the school solution and balance tests. */
@@ -337,6 +376,9 @@ export function simulate(ctx: TdgContext, seed: number, play: Playthrough): TdgS
   s = step(s, { type: 'commit' });
   for (const [formationId, placement] of Object.entries(play.decision)) {
     s = step(s, { type: 'assign', formationId, placement });
+  }
+  for (const [formationId, waypoints] of Object.entries(play.decisionAxes ?? {})) {
+    s = step(s, { type: 'setAxis', formationId, waypoints });
   }
   return step(s, { type: 'decide' });
 }

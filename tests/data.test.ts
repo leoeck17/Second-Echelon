@@ -97,6 +97,15 @@ describe('validateScenario', () => {
     expect(errors.some((e) => e.includes('default role'))).toBe(true);
   });
 
+  it('catches NATO positions that contradict their placement or stand on the Soviet side', () => {
+    const bad = clone(base);
+    bad.nato.truth[0]!.pos = { x: 13000, y: 4500 }; // Team A placed in A but standing in C
+    bad.nato.estimate[0]!.pos = { x: 16000, y: 10500 };
+    const errors = validateScenario(bad, era, equipment);
+    expect(errors.some((e) => e.includes('does not match its position'))).toBe(true);
+    expect(errors.some((e) => e.includes('west of the line of contact'))).toBe(true);
+  });
+
   it('catches an era mismatch', () => {
     const bad = clone(base);
     bad.era = '1980s';

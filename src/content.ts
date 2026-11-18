@@ -3,6 +3,7 @@
 import equipmentJson from '../data/equipment.json';
 import eraJson from '../data/eras/1970s.json';
 import type { EquipmentTable, EraData, Scenario } from './core/data';
+import type { MapData } from './core/terrain';
 
 export const equipment = equipmentJson as EquipmentTable;
 export const era = eraJson as unknown as EraData;
@@ -13,3 +14,8 @@ const modules = import.meta.glob<Scenario>('../data/scenarios/*.json', { eager: 
 export const scenarios: Scenario[] = Object.keys(modules)
   .sort()
   .map((k) => modules[k]!);
+
+const mapModules = import.meta.glob<MapData>('../data/maps/*.json', { eager: true, import: 'default' });
+
+/** All maps, by id. */
+export const maps: Record<string, MapData> = Object.fromEntries(Object.values(mapModules).map((m) => [m.id, m]));
